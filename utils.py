@@ -1,0 +1,21 @@
+from langchain_core.exceptions import OutputParserException
+
+# in case response with valid json, but don't have the field i want
+class InvalidJsonException(Exception):
+    pass
+
+# expects chains ending with json parser, invokes the chain until returned response is json and has the expected fields
+def get_chain_response_json(chain: any, invoker: dict[str, str], expected_fields: list[str]):
+    while True:
+        try:
+            res = chain.invoke(invoker)
+            if res is None:
+                raise InvalidJsonException
+            for k in expected_fields:
+                if k not in res:
+                    raise InvalidJsonException
+            return res
+        except OutputParserException:
+            print("Respond is not in expected format, retrying")
+        except InvalidJsonException:
+            print("Respond does not have field wanted, retrying")
