@@ -15,12 +15,12 @@ def main():
         AgentAttribute("Budget", "Low"),
     ]
     testAgent = Agent(id=1, name="Bob", desc="Highly motivated student prioritizing top marks in PT3/SPM exams.", attrs=testAttrs, simulation_id=1)
-    testAgent2 = Agent(id=2, name="Bobby", desc="Highly motivated student prioritizing top marks in PT3/SPM exams.", attrs=testAttrs2, simulation_id=1)
+    testAgent2 = Agent(id=2, name="Bobby", desc="Highly motivated student prioritizing top marks in PT3/SPM exams. Likes to obtain suggestions from others", attrs=testAttrs2, simulation_id=1)
     testEnv = "The Malaysian education system places high emphasis on standardized national exams like PT3 (Form 3) and SPM (Form 5) as crucial factors in determining university placement and future career opportunities. This creates a high-pressure environment for students and parents in the Klang Valley, a densely populated urban area. Here, a diverse range of tuition centers cater to various student needs and budgets, offering support for these crucial exams. However, intense competition necessitates effective marketing strategies and targeted offerings from tuition centers to attract students and their parents seeking academic success."
     product1 = Product(
         id=1,
         name="Intensive Exam Preparation Course (PT3/SPM)",
-        desc="Exam-oriented teaching, Past year paper analysis, Experienced teachers.",
+        desc="Exam-oriented teaching, Past year paper analysis, Experienced teachers. Subjects include Chinese, Moral",
         price=350.00,  # Assuming a price in MYR
         cost=200.00,  # Assuming a cost for the tuition center
         simulation_id=1
@@ -28,7 +28,7 @@ def main():
     product2 = Product(
         id=2,
         name="Small Group Subject Tutorials (PT3/SPM)",
-        desc="Personalized attention, Addressing individual weaknesses, Targeted practice exercises.",
+        desc="Personalized attention, Addressing individual weaknesses, Targeted practice exercises. Subjects include Maths",
         price=180.00,  # Assuming a price in MYR
         cost=120.00,  # Assuming a cost for the tuition center
         simulation_id=1
