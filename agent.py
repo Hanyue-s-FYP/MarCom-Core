@@ -26,7 +26,7 @@ class AgentAttributeRewrite(BaseModel):
 def get_agent_desc_rewrite(
     name: str, desc: str, attrs: list[AgentAttribute]
 ) -> dict[str, str]:
-    llm = Ollama(model="llama3")
+    llm = Ollama(model="llama3.1")
     parser = JsonOutputParser(pydantic_object=AgentAttributeRewrite)
     kvInStr = f"[{",".join([attr.string() for attr in attrs])}]"
     prompt = PromptTemplate(
@@ -110,7 +110,7 @@ class Agent:
         ]
         print(f"Assigning LLM to agent {self.id}")
         llm = Ollama(
-            model="llama3",
+            model="llama3.1",
             stop=["<|eot_id|>"],
         )
         print(
