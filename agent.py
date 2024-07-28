@@ -94,9 +94,10 @@ class Agent:
             {system_prompt}
             <|eot_id|>
             {memory}
-            All agents:{agents}
-            Available products:{products}
+            Valid agents:{agents}
+            Valid products:{products}
             Valid actions:{actions}
+            Please only take actions that are valid given in valid actions list
             {format_instructions}
         """,
         input_variables=["system_prompt", "memory", "agents", "products", "actions"],
@@ -171,6 +172,7 @@ class Agent:
             f"Assigning memory to agent {self.id}"
         )  # maybe regain memory from db in future?
         self.chain = self.prompt | llm | self.parser
+        return first_time
 
     # calls the agent to take action for the cycle
     def get_action(
@@ -189,8 +191,8 @@ class Agent:
                 "system_prompt": f"{env_desc}\n{self.sim_desc}",
                 "memory": "\n".join(self.memory),
                 "agents": f"[{','.join([agent.to_prompt_str() for agent in agents])}]",
-                "products": f"[{','.join([product.to_prompt_str() for product in products])}]",
-                "actions": ";".join([f"{k}:{v}" for k, v in (actions.items())]),
+                "products": f"[{';'.join([product.to_prompt_str() for product in products])}]",
+                "actions": f"[{';'.join([f'{k}:{v}' for k, v in (actions.items())])}]",
             },
             expected_fields=[k for k, _ in AgentAction().__dict__.items()],
             additional_check=lambda res: (
