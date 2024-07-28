@@ -17,10 +17,10 @@ def get_chain_response_json(chain: any, invoker: dict[str, str], expected_fields
                     raise InvalidJsonException
             if additional_check is not None:
                 if not additional_check(res):
+                    print(additional_check(res))
                     raise InvalidJsonException
             return res
         except OutputParserException:
             print("Respond is not in expected format, retrying")
         except InvalidJsonException:
-            print("Respond does not have field wanted, retrying")
-            print(res)
+            print("Respond does not have field wanted, retrying", res)

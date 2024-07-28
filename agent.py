@@ -36,7 +36,7 @@ def get_agent_desc_rewrite(
         partial_variables={"format_instructions": parser.get_format_instructions()},
     )
 
-    action_desc = f"Rewrite {desc} to provide context to an agent named {name} that is in a simulation in a second person point of view, start with 'You are in a simulation with other agents as {name}, a'"
+    action_desc = f"Rewrite {desc} to give instruction to an agent named {name} that is in a simulation in a second person point of view, start with 'You are in a simulation with other agents as {name}, a'"
     action = f"Given the following {{key,value}} pairs in a list {kvInStr}, write a paragraph in a second person point of view, try to fit everything in a short paragraph, do not include special characters in the description"
     chain = prompt | llm | parser
     print(f"Rewriting description for agent")
@@ -46,13 +46,19 @@ def get_agent_desc_rewrite(
         "{",
         "}",
     ]  # seems like if got {} in response it will become some sort of giberrish d, make sure no such character
+
+    def add_check(res):
+        if type(res["description"]) != str:
+            return False
+        return not any(
+            invalid_char in res["description"] for invalid_char in invalid_characters
+        )
+
     res = get_chain_response_json(
         chain,
         {"action": action},
         ["description"],
-        additional_check=lambda res: not any(
-            invalid_char in res["description"] for invalid_char in invalid_characters
-        ),
+        additional_check=add_check,
     )
     return {
         "description": res_desc["description"].strip()
@@ -90,7 +96,7 @@ class Agent:
             {memory}
             All agents:{agents}
             Available products:{products}
-            Available actions:{actions}
+            Valid actions:{actions}
             {format_instructions}
         """,
         input_variables=["system_prompt", "memory", "agents", "products", "actions"],
