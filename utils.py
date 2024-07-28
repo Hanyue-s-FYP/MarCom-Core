@@ -23,3 +23,4 @@ def get_chain_response_json(chain: any, invoker: dict[str, str], expected_fields
             print("Respond is not in expected format, retrying")
         except InvalidJsonException:
             print("Respond does not have field wanted, retrying")
+            print(res)

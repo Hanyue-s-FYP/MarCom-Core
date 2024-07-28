@@ -1,9 +1,21 @@
+import os
 from agent import Agent, AgentAttribute
 from product import Product
 from simulation import Simulation
+from dotenv import load_dotenv
 
+from db import *
 
 def main():
+    # configure environment variables
+    load_dotenv()
+    print(f"Env loaded: DB_FILE={os.getenv('DB_FILE')}; MODEL={os.getenv('MODEL')}")
+
+    # initialize the db
+    db.connect()
+    db.create_tables([AgentInfo, AgentMemory, SimulationEvent])
+    print(f"Database initialized")
+
     testAttrs = [
         AgentAttribute("Priority", "Scoring top marks"),
         AgentAttribute("Subjects", "Focus on core subjects (Math, Science, English)"),
@@ -33,7 +45,7 @@ def main():
         cost=120.00,  # Assuming a cost for the tuition center
         simulation_id=1
     )
-    simulation = Simulation(env_desc=testEnv, agents=[testAgent, testAgent2], products=[product1, product2])
+    simulation = Simulation(id=1, env_desc=testEnv, agents=[testAgent, testAgent2], products=[product1, product2])
     simulation.proceed_cycle()
 
 if __name__ == "__main__":

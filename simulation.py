@@ -1,15 +1,22 @@
 from agent import Agent
+from db import AgentInfo, SimulationEvent
 from product import Product
-
 
 class Simulation:
     # total_cycle is negative means should run infinitely
-    def __init__(self, env_desc: str, agents: list[Agent], products: list[Product], total_cycle: int = -1) -> None:
+    def __init__(self, id: int, env_desc: str, agents: list[Agent], products: list[Product], total_cycle: int = -1) -> None:
+        self.id = id
         self.env_desc = env_desc
         self.agents = agents
         self.products = products
         self.total_cycle = total_cycle
         self.cycle = 1
+
+        # actually initialising the agents
+        for a in agents:
+            first_time = a.init_agent()
+            if first_time:
+                SimulationEvent.create(type="SIMULATION", content=f"Initialised Agent {a.name} with rewritten description: {a.sim_desc}")
 
     # progresses the cycle
     def proceed_cycle(self):
