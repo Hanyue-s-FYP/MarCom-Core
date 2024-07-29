@@ -26,6 +26,7 @@ class Simulation:
             action = agent.get_action(self.env_desc, prompt_message, self.products, self.agents)
             # talk can go for very long
             while True:
+                print(action)
                 match action["action"]:
                     case "BUY":
                         break
@@ -65,7 +66,7 @@ class Simulation:
                             action = agent.get_action(self.env_desc, prompt_message, self.products, self.agents)
                         else:
                             action_next = agent_to_talk[0].get_talk_response(self.env_desc, prompt_message, self.products, [agent]) # message obtained from other agent, reforward to this agent and can rerun this big while loop
+                            print(action_next)
                             # can no need care if it's return to this agent d, just forward back
                             action = agent.get_action(self.env_desc, f"Agent {agent_to_talk[0].id} replies you:{action_next['additional_data_content']}", self.products, self.agents)
-            print(action)
         self.cycle += 1
