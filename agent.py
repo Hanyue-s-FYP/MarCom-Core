@@ -97,7 +97,7 @@ class Agent:
             Valid agents:{agents}
             Valid products:{products}
             Valid actions:{actions}
-            Please only take actions that are valid given in valid actions list
+            Please only take actions given in the valid actions list
             {format_instructions}
         """,
         input_variables=["system_prompt", "memory", "agents", "products", "actions"],
