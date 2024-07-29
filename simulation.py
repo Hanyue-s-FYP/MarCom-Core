@@ -16,7 +16,7 @@ class Simulation:
         for a in agents:
             first_time = a.init_agent()
             if first_time:
-                SimulationEvent.create(type="SIMULATION", content=f"Initialised Agent {a.name} with rewritten description: {a.sim_desc}")
+                SimulationEvent.create(sim_id=self.id, type="SIMULATION", content=f"Initialised Agent {a.name} with rewritten description: {a.sim_desc}")
 
     # progresses the cycle
     def proceed_cycle(self):

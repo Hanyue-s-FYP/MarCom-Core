@@ -36,7 +36,7 @@ def get_agent_desc_rewrite(
         partial_variables={"format_instructions": parser.get_format_instructions()},
     )
 
-    action_desc = f"Rewrite {desc} to give instruction to an agent named {name} that is in a simulation in a second person point of view, start with 'You are in a simulation with other agents as {name}, a'"
+    action_desc = f"Rewrite {desc} to provide context to an agent named {name} that is in a simulation in a second person point of view, start with 'You are in a simulation with other agents as {name}, a '"
     action = f"Given the following {{key,value}} pairs in a list {kvInStr}, write a paragraph in a second person point of view, try to fit everything in a short paragraph, do not include special characters in the description"
     chain = prompt | llm | parser
     print(f"Rewriting description for agent")
@@ -97,7 +97,7 @@ class Agent:
             Valid agents:{agents}
             Valid products:{products}
             Valid actions:{actions}
-            Please only take actions given in the valid actions list
+            Please only take actions given in the valid actions list.
             {format_instructions}
         """,
         input_variables=["system_prompt", "memory", "agents", "products", "actions"],
