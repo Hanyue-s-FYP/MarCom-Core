@@ -83,8 +83,8 @@ class Agent:
     # to keep consistency, let agent reply product_id:productname
     actions = {
         "BUY": "to buy a product (additional_data needed: 'product_id, product_name')",
-        "SKIP": "to skip this cycle without doing anything else (additional_data needed: none)",
-        "TALK": "to talk to another agent (additional_data needed: 'agent_id, message')",
+        "SKIP": "to skip this cycle without doing anything else (additional_data needed: 'id=0, reason')",
+        "MESSAGE": "to send a message to another agent (additional_data needed: 'agent_id, message')",
     }
     # prompt template would be pretty much the same for all agents (may need to be changed to support switching to other models)
     prompt = PromptTemplate(
@@ -92,13 +92,13 @@ class Agent:
             <|begin_of_text|>
             <|start_header_id|>system<|end_header_id|>
             {system_prompt}
-            <|eot_id|>
-            {memory}
             Valid agents:{agents}
             Valid products:{products}
             Valid actions:{actions}
             Please only take actions given in the valid actions list.
             {format_instructions}
+            <|eot_id|>
+            {memory}
         """,
         input_variables=["system_prompt", "memory", "agents", "products", "actions"],
         partial_variables={
@@ -182,8 +182,10 @@ class Agent:
         products: list[Product],
         agents: list[Self],
         actions: dict[str, str] = None,
+        should_add_memory: bool = False,
     ):
-        self.add_to_memory(message)
+        if should_add_memory:
+            self.add_to_memory(message)
         actions = actions if actions is not None else self.actions
         action = get_chain_response_json(
             self.chain,
@@ -202,10 +204,12 @@ class Agent:
         return action
 
     # when other agent talks to this agent, only can talk back to the agent
+    # always add to memory in this case
     def get_talk_response(
         self, env_desc: str, message: str, products: list[Product], agents: list[Self]
     ):
-        available_actions = {"TALK": self.actions["TALK"]}
+        self.add_to_memory(message)
+        available_actions = {"MESSAGE": self.actions["MESSAGE"]}
         return self.get_action(env_desc, message, products, agents, available_actions)
 
     # add to agent's memory

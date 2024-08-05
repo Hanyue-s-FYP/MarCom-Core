@@ -23,7 +23,7 @@ class Simulation:
         for agent in self.agents:
             prompt_message = f"Cycle {self.cycle} start"
             print(f"Obtaining action from agent {agent.id}")
-            action = agent.get_action(self.env_desc, prompt_message, self.products, self.agents)
+            action = agent.get_action(self.env_desc, prompt_message, self.products, self.agents, should_add_memory=True)
             # talk can go for very long
             while True:
                 print(action)
@@ -32,7 +32,7 @@ class Simulation:
                         break
                     case "SKIP":
                         break
-                    case "TALK":
+                    case "MESSAGE":
                         prompt_message = ""
                         agent_to_talk = None
                         # check if recepient exist
@@ -52,21 +52,22 @@ class Simulation:
                                 if len(agent_to_talk) != 1:
                                     prompt_message = "Agent do not exist in environment" # id should be unique
                             elif len(split) == 2 and not split[1].isdigit():        
-                                prompt_message = "Invalid talk additional data format, please provide only the agenrt id or agent_id:id"
+                                prompt_message = "Invalid talk additional data format, please provide only the agent id or agent_id:id"
                             elif len(split) == 2 and split[1].isdigit():
                                 agent_to_talk = [a for a in self.agents if a.id == int(split[1])]
                                 if len(agent_to_talk) != 1:
                                     prompt_message = "Agent do not exist in environment" # id should be unique
                         
-                        # if prompt message has not been set then should be no error alrd
-                        if prompt_message == "":
-                            prompt_message = f"Agent {agent.id} sends you a message:{action['additional_data_content']}, what would you like to reply?"
-
-                        if agent_to_talk is None:
+                        if agent_to_talk is None or len(agent_to_talk) == 0:
                             action = agent.get_action(self.env_desc, prompt_message, self.products, self.agents)
                         else:
+                            # if prompt message has not been set then should be no error alrd
+                            if prompt_message == "":
+                                prompt_message = f"Agent {agent.id} sends you a message:{action['additional_data_content']}, what would you like to reply?"
+                            # add to memory of the sending agent so it is aware that it sent a message to another agent
+                            agent.add_to_memory(f"You sent agent {agent_to_talk[0].id} a message: {action['additional_data_content']}")
                             action_next = agent_to_talk[0].get_talk_response(self.env_desc, prompt_message, self.products, [agent]) # message obtained from other agent, reforward to this agent and can rerun this big while loop
                             print(action_next)
                             # can no need care if it's return to this agent d, just forward back
-                            action = agent.get_action(self.env_desc, f"Agent {agent_to_talk[0].id} replies you:{action_next['additional_data_content']}", self.products, self.agents)
+                            action = agent.get_action(self.env_desc, f"Agent {agent_to_talk[0].id} replies you:{action_next['additional_data_content']}", self.products, self.agents, should_add_memory=True)
         self.cycle += 1
