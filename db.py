@@ -14,6 +14,7 @@ class AgentInfo(Model):
     agent_id = IntegerField()
     sim_id = IntegerField()
     rewritten_desc = TextField()
+    rewritten_desc_third_person = TextField()
 
     class Meta:
         database = db
@@ -30,8 +31,8 @@ class AgentMemory(Model):
 class SimulationEvent(Model):
     agent = ForeignKeyField(AgentInfo, backref="events", null=True) # agents only exist if event type is of ACTION event
     sim_id = IntegerField()
-    type = TextField() # (BUY/SKIP/TALK): agent takes action, SIMULATION: high level simulation related events, like initializing agent, ACTION_RESP: response to BUY actions of an agent
-    content = TextField() # additional information about the event (where the actual message resides)
+    type = TextField() # (BUY/SKIP/MESSAGE): agent takes action, SIMULATION: high level simulation related events, like initializing agent, ACTION_RESP: response to BUY actions of an agent
+    content = TextField() # additional information about the event (where the actual message resides) for BUY format is PRODUCT_ID:REASON, for MESSAGE format is AGENT_ID:CONTENT
     time_created = DateTimeField(default=datetime.now) # better than just storing a counter and incrementing them to preserve order
     class Meta:
         database = db

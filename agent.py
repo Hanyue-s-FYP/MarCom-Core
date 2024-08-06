@@ -36,12 +36,9 @@ def get_agent_desc_rewrite(
         partial_variables={"format_instructions": parser.get_format_instructions()},
     )
 
-    action_desc = f"Rewrite {desc} to provide context to an agent named {name} that is in a simulation in a second person point of view, start with 'You are in a simulation with other agents as {name}, a '"
-    action = f"Given the following {{key,value}} pairs in a list {kvInStr}, write a paragraph in a second person point of view, try to fit everything in a short paragraph, do not include special characters in the description"
+    rewrite_desc = f"Rewrite {desc} to provide context to an agent named {name} that is in a simulation in a second person point of view, start with 'You are in a simulation with other agents as {name}, a '"
+    rewrite_attr_second_person = f"Given the following {{key,value}} pairs in a list {kvInStr}, write a paragraph in a second person point of view, try to fit everything in a short paragraph, do not include special characters in the description"
     chain = prompt | llm | parser
-    print(f"Rewriting description for agent")
-    res_desc = get_chain_response_json(chain, {"action": action_desc}, ["description"])
-    print(f"Rewriting attributes for agent")
     invalid_characters = [
         "{",
         "}",
@@ -54,16 +51,32 @@ def get_agent_desc_rewrite(
             invalid_char in res["description"] for invalid_char in invalid_characters
         )
 
+    print(f"Rewriting description for agent")
+    res_desc = get_chain_response_json(
+        chain, {"action": rewrite_desc}, ["description"], additional_check=add_check
+    )
+    print(f"Rewriting attributes for agent")
     res = get_chain_response_json(
         chain,
-        {"action": action},
+        {"action": rewrite_attr_second_person},
         ["description"],
         additional_check=add_check,
     )
+    rewrite_second_person = res_desc["description"].strip() + " " + res["description"].strip()
+
+    # rewrite again in 3rd person point of view so can provide to feedback agent
+    rewrite_third_person_prompt = f"Rewrite '{rewrite_second_person}' in a third person point of view"
+    print(f"Rewriting description for agent in third person view")
+    res_3rd = get_chain_response_json(
+        chain,
+        {"action": rewrite_third_person_prompt},
+        ["description"],
+        additional_check=add_check
+    )
+
     return {
-        "description": res_desc["description"].strip()
-        + " "
-        + res["description"].strip()
+        "description": rewrite_second_person,
+        "description_3rd": res_3rd,
     }
 
 
@@ -140,18 +153,20 @@ class Agent:
         )
         if self.agent_model is None:
             # obtain the rewritten description
-            self.sim_desc = get_agent_desc_rewrite(self.name, self.desc, self.attrs)[
-                "description"
-            ]
+            desc = get_agent_desc_rewrite(self.name, self.desc, self.attrs)
+            self.sim_desc = desc["description"]
+            self.sim_desc_3rd = desc["description_3rd"]
             # write rewritten description of the agent to the db
             self.agent_model = AgentInfo.create(
                 agent_id=self.id,
                 sim_id=self.simulation_id,
                 rewritten_desc=self.sim_desc,
+                rewritten_desc_third_person=self.sim_desc_3rd
             )
         else:
             # already has record in db
             self.sim_desc = self.agent_model.rewritten_desc
+            self.sim_desc_3rd = self.agent_model.rewritten_desc_third_person
             first_time = False
         print(f"Assigning LLM to agent {self.id}")
         # find if the agent has memory stored in db
@@ -191,7 +206,7 @@ class Agent:
             self.chain,
             {
                 "system_prompt": f"{env_desc}\n{self.sim_desc}",
-                "memory": "\n".join(self.memory),
+                "memory": "\n".join(self.memory) + message if not should_add_memory else "", # if no add to memory, just append as part of the prompt
                 "agents": f"[{','.join([agent.to_prompt_str() for agent in agents])}]",
                 "products": f"[{';'.join([product.to_prompt_str() for product in products])}]",
                 "actions": f"[{';'.join([f'{k}:{v}' for k, v in (actions.items())])}]",
