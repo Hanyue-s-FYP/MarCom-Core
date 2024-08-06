@@ -14,13 +14,14 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10simulation.proto\x12\nsimulation\",\n\x0e\x41gentAttribute\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"Z\n\x05\x41gent\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x03 \x01(\t\x12)\n\x05\x61ttrs\x18\x04 \x03(\x0b\x32\x1a.simulation.AgentAttribute\"N\n\x07Product\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x03 \x01(\t\x12\r\n\x05price\x18\x04 \x01(\x02\x12\x0c\n\x04\x63ost\x18\x05 \x01(\x02\"{\n\x11SimulationRequest\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x10\n\x08\x65nv_desc\x18\x02 \x01(\t\x12!\n\x06\x61gents\x18\x03 \x03(\x0b\x32\x11.simulation.Agent\x12%\n\x08products\x18\x04 \x03(\x0b\x32\x13.simulation.Product\"%\n\x12SimulationResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\"%\n\x0cPauseRequest\x12\x15\n\rsimulation_id\x18\x01 \x01(\t\" \n\rPauseResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\"&\n\rStreamRequest\x12\x15\n\rsimulation_id\x18\x01 \x01(\t\"5\n\x10SimulationUpdate\x12\x10\n\x08\x61gent_id\x18\x01 \x01(\t\x12\x0f\n\x07\x61\x63tions\x18\x02 \x03(\t2\xf9\x01\n\x11SimulationService\x12P\n\x0fStartSimulation\x12\x1d.simulation.SimulationRequest\x1a\x1e.simulation.SimulationResponse\x12\x46\n\x0fPauseSimulation\x12\x18.simulation.PauseRequest\x1a\x19.simulation.PauseResponse\x12J\n\rStreamUpdates\x12\x19.simulation.StreamRequest\x1a\x1c.simulation.SimulationUpdate0\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10simulation.proto\x12\nsimulation\",\n\x0e\x41gentAttribute\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"Z\n\x05\x41gent\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x03 \x01(\t\x12)\n\x05\x61ttrs\x18\x04 \x03(\x0b\x32\x1a.simulation.AgentAttribute\"N\n\x07Product\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x03 \x01(\t\x12\r\n\x05price\x18\x04 \x01(\x02\x12\x0c\n\x04\x63ost\x18\x05 \x01(\x02\"{\n\x11SimulationRequest\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x10\n\x08\x65nv_desc\x18\x02 \x01(\t\x12!\n\x06\x61gents\x18\x03 \x03(\x0b\x32\x11.simulation.Agent\x12%\n\x08products\x18\x04 \x03(\x0b\x32\x13.simulation.Product\"%\n\x12SimulationResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\"%\n\x0cPauseRequest\x12\x15\n\rsimulation_id\x18\x01 \x01(\t\" \n\rPauseResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\"&\n\rStreamRequest\x12\x15\n\rsimulation_id\x18\x01 \x01(\t\"E\n\x10SimulationUpdate\x12\x10\n\x08\x61gent_id\x18\x01 \x01(\t\x12\x0e\n\x06\x61\x63tion\x18\x02 \x01(\t\x12\x0f\n\x07\x63ontent\x18\x03 \x01(\t2\xf9\x01\n\x11SimulationService\x12P\n\x0fStartSimulation\x12\x1d.simulation.SimulationRequest\x1a\x1e.simulation.SimulationResponse\x12\x46\n\x0fPauseSimulation\x12\x18.simulation.PauseRequest\x1a\x19.simulation.PauseResponse\x12J\n\rStreamUpdates\x12\x19.simulation.StreamRequest\x1a\x1c.simulation.SimulationUpdate0\x01\x42\x14Z\x12./proto_simulationb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'simulation_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
-  DESCRIPTOR._loaded_options = None
+  _globals['DESCRIPTOR']._loaded_options = None
+  _globals['DESCRIPTOR']._serialized_options = b'Z\022./proto_simulation'
   _globals['_AGENTATTRIBUTE']._serialized_start=32
   _globals['_AGENTATTRIBUTE']._serialized_end=76
   _globals['_AGENT']._serialized_start=78
@@ -38,7 +39,7 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_STREAMREQUEST']._serialized_start=487
   _globals['_STREAMREQUEST']._serialized_end=525
   _globals['_SIMULATIONUPDATE']._serialized_start=527
-  _globals['_SIMULATIONUPDATE']._serialized_end=580
-  _globals['_SIMULATIONSERVICE']._serialized_start=583
-  _globals['_SIMULATIONSERVICE']._serialized_end=832
+  _globals['_SIMULATIONUPDATE']._serialized_end=596
+  _globals['_SIMULATIONSERVICE']._serialized_start=599
+  _globals['_SIMULATIONSERVICE']._serialized_end=848
 # @@protoc_insertion_point(module_scope)
