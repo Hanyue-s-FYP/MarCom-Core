@@ -45,8 +45,10 @@ def main():
         cost=120.00,  # Assuming a cost for the tuition center
         simulation_id=1
     )
-    simulation = Simulation(id=1, env_desc=testEnv, agents=[testAgent, testAgent2], products=[product1, product2])
-    simulation.proceed_cycle()
+    simulation = Simulation(id=1, env_desc=testEnv, agents=[testAgent, testAgent2], products=[product1, product2], total_cycle=5)
+    simulation.init_simulation()
+    for events in simulation.run_simulation():
+        print(events)
 
 if __name__ == "__main__":
     main()

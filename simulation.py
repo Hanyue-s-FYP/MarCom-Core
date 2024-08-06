@@ -27,7 +27,7 @@ class Simulation:
         self.total_cycle = total_cycle
         self.cycle = 1
 
-    def start_simulation(self):
+    def init_simulation(self):
         # actually initialising the agents
         for a in self.agents:
             first_time = a.init_agent()
@@ -89,7 +89,7 @@ class Simulation:
     def proceed_cycle(self):
         for agent in self.agents:
             prompt_message = f"Cycle {self.cycle} start"
-            print(f"Obtaining action from agent {agent.id}")
+            # obtaining action from agent
             action = agent.get_action(
                 self.env_desc,
                 prompt_message,
@@ -99,7 +99,6 @@ class Simulation:
             )
             # talk can go for very long
             while True:
-                print(action)
                 match action["action"]:
                     case "BUY":
                         # obtain the product purchased by the agent (check if is valid as well)
@@ -276,6 +275,10 @@ class Simulation:
                             )
         self.cycle += 1
 
+    def run_simulation(self):
+        while self.cycle <= self.total_cycle:
+            for event in self.proceed_cycle():
+                yield event
 
 # helper object to get structured response
 class SimulationActionResp(BaseModel):

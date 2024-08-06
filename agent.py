@@ -51,11 +51,11 @@ def get_agent_desc_rewrite(
             invalid_char in res["description"] for invalid_char in invalid_characters
         )
 
-    print(f"Rewriting description for agent")
+    # rewriting description for agent
     res_desc = get_chain_response_json(
         chain, {"action": rewrite_desc}, ["description"], additional_check=add_check
     )
-    print(f"Rewriting attributes for agent")
+    # rewriting attributes for agent
     res = get_chain_response_json(
         chain,
         {"action": rewrite_attr_second_person},
@@ -66,7 +66,7 @@ def get_agent_desc_rewrite(
 
     # rewrite again in 3rd person point of view so can provide to feedback agent
     rewrite_third_person_prompt = f"Rewrite '{rewrite_second_person}' in a third person point of view"
-    print(f"Rewriting description for agent in third person view")
+    # rewriting description for agent in third person view
     res_3rd = get_chain_response_json(
         chain,
         {"action": rewrite_third_person_prompt},
@@ -143,11 +143,8 @@ class Agent:
     # returns True if the agent is being initialized for the first time (no previous record of rewritten descriptions in the db), False otherwise, so Simulation can insert to the SimulationEvent regarding creation of agent
     def init_agent(self) -> bool:
         first_time = True
-        print(f"Initialising agent {self.id} for simulation {self.simulation_id}")
+        # initialising agent for simulation
         # get combined description (can get from db if any for consistency, if ntg from db generate lo)
-        print(
-            f"Getting rewritten version of agent {self.id}, combining attributes and general description"
-        )
         self.agent_model = AgentInfo.get_or_none(
             AgentInfo.agent_id == self.id, AgentInfo.sim_id == self.simulation_id
         )
@@ -168,7 +165,6 @@ class Agent:
             self.sim_desc = self.agent_model.rewritten_desc
             self.sim_desc_3rd = self.agent_model.rewritten_desc_third_person
             first_time = False
-        print(f"Assigning LLM to agent {self.id}")
         # find if the agent has memory stored in db
         memory_query = (
             AgentMemory.select(AgentMemory)
@@ -183,9 +179,6 @@ class Agent:
             stop=["<|eot_id|>"],  # might need to change this when switch model
             format="json",
         )
-        print(
-            f"Assigning memory to agent {self.id}"
-        )  # maybe regain memory from db in future?
         self.chain = self.prompt | llm | self.parser
         return first_time
 
