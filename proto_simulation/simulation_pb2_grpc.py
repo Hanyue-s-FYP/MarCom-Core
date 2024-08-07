@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-import simulation_pb2 as simulation__pb2
+from proto_simulation import simulation_pb2 as proto__simulation_dot_simulation__pb2
 
 GRPC_GENERATED_VERSION = '1.65.4'
 GRPC_VERSION = grpc.__version__
@@ -20,7 +20,7 @@ except ImportError:
 if _version_not_supported:
     warnings.warn(
         f'The grpc package installed is at version {GRPC_VERSION},'
-        + f' but the generated code in simulation_pb2_grpc.py depends on'
+        + f' but the generated code in proto_simulation/simulation_pb2_grpc.py depends on'
         + f' grpcio>={GRPC_GENERATED_VERSION}.'
         + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
         + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
@@ -41,18 +41,18 @@ class SimulationServiceStub(object):
         """
         self.StartSimulation = channel.unary_unary(
                 '/simulation.SimulationService/StartSimulation',
-                request_serializer=simulation__pb2.SimulationRequest.SerializeToString,
-                response_deserializer=simulation__pb2.SimulationResponse.FromString,
+                request_serializer=proto__simulation_dot_simulation__pb2.SimulationRequest.SerializeToString,
+                response_deserializer=proto__simulation_dot_simulation__pb2.SimulationResponse.FromString,
                 _registered_method=True)
         self.PauseSimulation = channel.unary_unary(
                 '/simulation.SimulationService/PauseSimulation',
-                request_serializer=simulation__pb2.PauseRequest.SerializeToString,
-                response_deserializer=simulation__pb2.PauseResponse.FromString,
+                request_serializer=proto__simulation_dot_simulation__pb2.PauseRequest.SerializeToString,
+                response_deserializer=proto__simulation_dot_simulation__pb2.PauseResponse.FromString,
                 _registered_method=True)
         self.StreamUpdates = channel.unary_stream(
                 '/simulation.SimulationService/StreamUpdates',
-                request_serializer=simulation__pb2.StreamRequest.SerializeToString,
-                response_deserializer=simulation__pb2.SimulationUpdate.FromString,
+                request_serializer=proto__simulation_dot_simulation__pb2.StreamRequest.SerializeToString,
+                response_deserializer=proto__simulation_dot_simulation__pb2.SimulationUpdate.FromString,
                 _registered_method=True)
 
 
@@ -82,18 +82,18 @@ def add_SimulationServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'StartSimulation': grpc.unary_unary_rpc_method_handler(
                     servicer.StartSimulation,
-                    request_deserializer=simulation__pb2.SimulationRequest.FromString,
-                    response_serializer=simulation__pb2.SimulationResponse.SerializeToString,
+                    request_deserializer=proto__simulation_dot_simulation__pb2.SimulationRequest.FromString,
+                    response_serializer=proto__simulation_dot_simulation__pb2.SimulationResponse.SerializeToString,
             ),
             'PauseSimulation': grpc.unary_unary_rpc_method_handler(
                     servicer.PauseSimulation,
-                    request_deserializer=simulation__pb2.PauseRequest.FromString,
-                    response_serializer=simulation__pb2.PauseResponse.SerializeToString,
+                    request_deserializer=proto__simulation_dot_simulation__pb2.PauseRequest.FromString,
+                    response_serializer=proto__simulation_dot_simulation__pb2.PauseResponse.SerializeToString,
             ),
             'StreamUpdates': grpc.unary_stream_rpc_method_handler(
                     servicer.StreamUpdates,
-                    request_deserializer=simulation__pb2.StreamRequest.FromString,
-                    response_serializer=simulation__pb2.SimulationUpdate.SerializeToString,
+                    request_deserializer=proto__simulation_dot_simulation__pb2.StreamRequest.FromString,
+                    response_serializer=proto__simulation_dot_simulation__pb2.SimulationUpdate.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -121,8 +121,8 @@ class SimulationService(object):
             request,
             target,
             '/simulation.SimulationService/StartSimulation',
-            simulation__pb2.SimulationRequest.SerializeToString,
-            simulation__pb2.SimulationResponse.FromString,
+            proto__simulation_dot_simulation__pb2.SimulationRequest.SerializeToString,
+            proto__simulation_dot_simulation__pb2.SimulationResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -148,8 +148,8 @@ class SimulationService(object):
             request,
             target,
             '/simulation.SimulationService/PauseSimulation',
-            simulation__pb2.PauseRequest.SerializeToString,
-            simulation__pb2.PauseResponse.FromString,
+            proto__simulation_dot_simulation__pb2.PauseRequest.SerializeToString,
+            proto__simulation_dot_simulation__pb2.PauseResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -175,8 +175,8 @@ class SimulationService(object):
             request,
             target,
             '/simulation.SimulationService/StreamUpdates',
-            simulation__pb2.StreamRequest.SerializeToString,
-            simulation__pb2.SimulationUpdate.FromString,
+            proto__simulation_dot_simulation__pb2.StreamRequest.SerializeToString,
+            proto__simulation_dot_simulation__pb2.SimulationUpdate.FromString,
             options,
             channel_credentials,
             insecure,

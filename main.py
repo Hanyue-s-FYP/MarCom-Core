@@ -1,8 +1,14 @@
+from concurrent import futures
+import logging
 import os
+
+import grpc
+from SimulationServicer import SimulationServicer
 from agent import Agent, AgentAttribute
 from product import Product
 from simulation import Simulation
 from dotenv import load_dotenv
+from proto_simulation import simulation_pb2_grpc
 
 from db import *
 
@@ -15,6 +21,10 @@ def main():
     db.connect()
     db.create_tables([AgentInfo, AgentMemory, SimulationEvent])
     print(f"Database initialized")
+
+    # start grpc server
+    # print("Initialise grpc simulation servicer")
+    # init_simulation_servicer()
 
     testAttrs = [
         AgentAttribute("Priority", "Scoring top marks"),
@@ -47,8 +57,15 @@ def main():
     )
     simulation = Simulation(id=1, env_desc=testEnv, agents=[testAgent, testAgent2], products=[product1, product2], total_cycle=5)
     simulation.init_simulation()
-    for events in simulation.run_simulation():
-        print(events)
+    for event in simulation.run_simulation():
+        print(event, f"Agent ID: {event.agent.agent_id if event.agent is not None else -1}, Sim ID: {event.sim_id}, Type: {event.type}, Content: {event.content}, Time: {event.time_created}")
+
+def init_simulation_servicer():
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    simulation_pb2_grpc.add_SimulationServiceServicer_to_server(SimulationServicer(), server)
+    server.add_insecure_port(f"[::]:{os.getenv('GRPC_SIMULATION_PORT')}")
+    server.start()
+    server.wait_for_termination()
 
 if __name__ == "__main__":
     main()

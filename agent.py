@@ -36,7 +36,7 @@ def get_agent_desc_rewrite(
         partial_variables={"format_instructions": parser.get_format_instructions()},
     )
 
-    rewrite_desc = f"Rewrite {desc} to provide context to an agent named {name} that is in a simulation in a second person point of view, start with 'You are in a simulation with other agents as {name}, a '"
+    rewrite_desc = f"Rewrite {desc} to create an agent named {name} that is in a simulation in a second person point of view, start with 'You are in a simulation with other agents as {name},'"
     rewrite_attr_second_person = f"Given the following {{key,value}} pairs in a list {kvInStr}, write a paragraph in a second person point of view, try to fit everything in a short paragraph, do not include special characters in the description"
     chain = prompt | llm | parser
     invalid_characters = [
@@ -84,10 +84,10 @@ class AgentAction(BaseModel):
     action: str = Field("the action to take")
     reason: str = Field("the reason for the action taken")
     additional_data_id: int = Field(
-        "additional data id to complete the action, for action TALK, write agent_id, for action BUY, write product_id"
+        "additional data id to complete the action, for action MESSAGE, write agent_id, for action BUY, write product_id, for SKIP, write 0"
     )
     additional_data_content: str = Field(
-        "additional data content to complete the action, for action BUY, write name of the product, for action TALK, write the message"
+        "additional data content to complete the action, for action BUY, write name of the product, for action MESSAGE, write the message, for SKIP, write the reason"
     )
 
 
@@ -96,7 +96,7 @@ class Agent:
     # to keep consistency, let agent reply product_id:productname
     actions = {
         "BUY": "to buy a product (additional_data needed: 'product_id, product_name')",
-        "SKIP": "to skip this cycle without doing anything else (additional_data needed: 'id=0, reason')",
+        "SKIP": "to skip this cycle without doing anything else (additional_data needed: 'id, reason')",
         "MESSAGE": "to send a message to another agent (additional_data needed: 'agent_id, message')",
     }
     # prompt template would be pretty much the same for all agents (may need to be changed to support switching to other models)
@@ -105,12 +105,12 @@ class Agent:
             <|begin_of_text|>
             <|start_header_id|>system<|end_header_id|>
             {system_prompt}
-            Valid agents:{agents}
-            Valid products:{products}
-            Valid actions:{actions}
             Please only take actions given in the valid actions list.
             {format_instructions}
             <|eot_id|>
+            Valid agents:{agents}
+            Valid products:{products}
+            Valid actions:{actions}
             {memory}
         """,
         input_variables=["system_prompt", "memory", "agents", "products", "actions"],

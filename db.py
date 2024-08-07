@@ -33,6 +33,7 @@ class SimulationEvent(Model):
     sim_id = IntegerField()
     type = TextField() # (BUY/SKIP/MESSAGE): agent takes action, SIMULATION: high level simulation related events, like initializing agent, ACTION_RESP: response to BUY actions of an agent
     content = TextField() # additional information about the event (where the actual message resides) for BUY format is PRODUCT_ID:REASON, for MESSAGE format is AGENT_ID:CONTENT
+    cycle = IntegerField() # which cycle does this happen, if is initialisation, then is 0
     time_created = DateTimeField(default=datetime.now) # better than just storing a counter and incrementing them to preserve order
     class Meta:
         database = db

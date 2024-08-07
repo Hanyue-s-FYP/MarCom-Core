@@ -1,6 +1,6 @@
 import random
 from agent import Agent
-from db import SimulationEvent
+from db import AgentInfo, SimulationEvent
 from product import Product
 from pydantic import BaseModel, Field
 from langchain_community.llms import Ollama
@@ -26,17 +26,22 @@ class Simulation:
         self.products = products
         self.total_cycle = total_cycle
         self.cycle = 1
+        self.inited = False
 
     def init_simulation(self):
         # actually initialising the agents
         for a in self.agents:
             first_time = a.init_agent()
             if first_time:
+                agent = AgentInfo.create(agent_id=a.id, sim_id=self.id, rewritten_desc=a.sim_desc, rewritten_desc_third_person=a.sim_desc_3rd)
                 yield SimulationEvent.create(
+                    agent=agent,
                     sim_id=self.id,
                     type="SIMULATION",
                     content=f"Initialised Agent {a.name} with rewritten description: {a.sim_desc}",
+
                 )
+        self.inited = True
 
     # use another LLM and generate events for feedbacks on "BUY" and "SKIP" actions
     # also provide the product details and maybe the agent description so the LLM can get more context
@@ -97,6 +102,7 @@ class Simulation:
                 self.agents,
                 should_add_memory=True,
             )
+            agent_model = AgentInfo.create(agent_id=agent.id, sim_id=self.id, rewritten_desc=agent.sim_desc, rewritten_desc_third_person=agent.sim_desc_3rd)
             # talk can go for very long
             while True:
                 match action["action"]:
@@ -149,7 +155,7 @@ class Simulation:
                             )
                             # create the BUY event and yield it out to facilitate returning to backend
                             event = SimulationEvent.create(
-                                agent=agent,
+                                agent=agent_model,
                                 sim_id=self.id,
                                 type="BUY",
                                 content=f"{product_to_buy[0].id}:{action['additional_data_content']}",
@@ -165,7 +171,7 @@ class Simulation:
                             )
                             agent.add_to_memory(feedback["feedback"])
                             feedback_event = SimulationEvent.create(
-                                agent=agent,
+                                agent=agent_model,
                                 sim_id=self.id,
                                 type="ACTION_RESP",
                                 content=feedback["feedback"],
@@ -177,7 +183,7 @@ class Simulation:
                         agent.add_to_memory("You did not buy anything")
                         # create the SKIP event and yield it out to facilitate returning to backend
                         event = SimulationEvent.create(
-                            agent=agent,
+                            agent=agent_model,
                             sim_id=self.id,
                             type="SKIP",
                             content="",
@@ -193,7 +199,7 @@ class Simulation:
                         )
                         agent.add_to_memory(feedback["feedback"])
                         feedback_event = SimulationEvent.create(
-                            agent=agent,
+                            agent=agent_model,
                             sim_id=self.id,
                             type="ACTION_RESP",
                             content=feedback["feedback"],
@@ -249,17 +255,19 @@ class Simulation:
                             )
                             # create the MESSAGE event and yield it out to facilitate returning to backend
                             event = SimulationEvent.create(
-                                agent=agent,
+                                agent=agent_model,
                                 sim_id=self.id,
                                 type="MESSAGE",
                                 content=f"{agent_to_talk[0].id}:{action['additional_data_content']}",
                             )
                             yield event
+                            # agent_to_talk model
+                            agent_model_next = AgentInfo.create(agent_id=agent_to_talk.id[0], sim_id=self.id, rewritten_desc=agent_to_talk[0].sim_desc, rewritten_desc_third_person=agent_to_talk[0].sim_desc_3rd)
                             action_next = agent_to_talk[0].get_talk_response(
                                 self.env_desc, prompt_message, self.products, [agent]
                             )  # message obtained from other agent, reforward to this agent and can rerun this big while loop
                             reply_event = SimulationEvent.create(
-                                agent=agent_to_talk[0],
+                                agent=agent_model_next,
                                 sim_id=self.id,
                                 type="MESSAGE",
                                 content=f"{agent.id}:{action['additional_data_content']}"
@@ -276,6 +284,9 @@ class Simulation:
         self.cycle += 1
 
     def run_simulation(self):
+        if not self.inited:
+            for simulation_init_event in self.init_simulation():
+                yield simulation_init_event
         while self.cycle <= self.total_cycle:
             for event in self.proceed_cycle():
                 yield event
