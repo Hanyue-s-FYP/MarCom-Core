@@ -33,33 +33,38 @@ class Simulation:
         for a in self.agents:
             first_time = a.init_agent()
             if first_time:
-                agent = AgentInfo.create(agent_id=a.id, sim_id=self.id, rewritten_desc=a.sim_desc, rewritten_desc_third_person=a.sim_desc_3rd)
+                agent = AgentInfo.create(
+                    agent_id=a.id,
+                    sim_id=self.id,
+                    rewritten_desc=a.sim_desc,
+                    rewritten_desc_third_person=a.sim_desc_3rd,
+                )
                 yield SimulationEvent.create(
                     agent=agent,
                     sim_id=self.id,
                     type="SIMULATION",
                     content=f"Initialised Agent {a.name} with rewritten description: {a.sim_desc}",
-
+                    cycle=self.cycle,
                 )
         self.inited = True
 
     # use another LLM and generate events for feedbacks on "BUY" and "SKIP" actions
     # also provide the product details and maybe the agent description so the LLM can get more context
     def simulation_response_helper(
-        action: str, reason: str, env_desc: str, product: Product, agent: Agent
+        self, action: str, reason: str, env_desc: str, product: Product, agent: Agent
     ) -> str:
-        should_positive = random.choice([True, False])
+        should_positive = random.randrange(1, 10) > 6 # 5050 chance to be positive
         prompt_template = """
             <|begin_of_text|>
             <|start_header_id|>system<|end_header_id|>
-            You are managing a simulation where LLM agents are being used to simulate consumer behavior where they can either buy or skip a certain product. Generate a {should_positive} random event relative to the environment description and provide a single short sentence on how effective the product is to the agent relative to the agent description based on the product purchase details, the random event and the environment description.
-            {format_instructions}
+            You are managing a simulation where LLM agents are being used to simulate consumer behavior where they can either buy or skip a certain product. Generate a random event in first person point of view that is {should_positive} relative to the environment description and provide a single short sentence on how effective the product is to the agent relative to the agent description based on the product purchase details, the random event and the environment description. If action is SKIP, generate random events that are not related to the product but relates to the environment description and the agent's aim. {should_positive_enforcement}
+            Response format:{format_instructions}
             <|eot_id|>
-            Environment Description: {env_desc}
-            Purchased Product Details: {product_desc}
-            Agent Description: {agent_desc}
-            Action: {agent_action}
-            Reason: {action_reason}
+            Environment Description:{env_desc}
+            Purchased Product Details:{product_desc}
+            Agent Description:{agent_desc}
+            Action:{agent_action}
+            Reason:{action_reason}
         """
         llm = Ollama(model="llama3.1", format="json")
         parser = JsonOutputParser(pydantic_object=SimulationActionResp)
@@ -75,6 +80,7 @@ class Simulation:
             partial_variables={
                 "format_instructions": parser.get_format_instructions(),
                 "should_positive": "positive" if should_positive else "negative",
+                "should_positive_enforcement": "The event should clearly benefit the agent." if should_positive else "The event should clearly harm the agent without any potential for positive interpretation."
             },
         )
         chain = prompt | llm | parser
@@ -82,7 +88,7 @@ class Simulation:
             chain,
             {
                 "env_desc": env_desc,
-                "product_desc": product.desc,
+                "product_desc": product.desc if product is not None else "Agent did not buy any product",
                 "agent_desc": agent.sim_desc_3rd,
                 "agent_action": action,
                 "action_reason": reason,
@@ -102,7 +108,7 @@ class Simulation:
                 self.agents,
                 should_add_memory=True,
             )
-            agent_model = AgentInfo.create(agent_id=agent.id, sim_id=self.id, rewritten_desc=agent.sim_desc, rewritten_desc_third_person=agent.sim_desc_3rd)
+            agent_model = AgentInfo.select().where(AgentInfo.agent_id == agent.id)
             # talk can go for very long
             while True:
                 match action["action"]:
@@ -115,33 +121,34 @@ class Simulation:
                         # tolerate two cases: agent_id:id or id
                         if str(data_bundle).isdigit():
                             product_to_buy = [
-                                p for p in self.products if p.id == data_bundle
+                                p for p in self.products if int(p.id) == int(data_bundle)
                             ]
                             if len(product_to_buy) != 1:
-                                prompt_message = "Product do not exist in environment"  # id should be unique
+                                prompt_message = f"product do not exist in environment, valid IDs are [{','.join([str(p.id) for p in self.products])}]"  # id should be unique
                         else:
                             split = data_bundle.split(":")
                             if len(split) > 2:
-                                prompt_message = "Invalid buy additional data format, please only provide product id or product_id:id"
+                                prompt_message = "invalid buy additional data format, please only provide product id or product_id:id"
                             if len(split) == 1 and split[0].isdigit():
                                 product_to_buy = [
-                                    p for p in self.products if p.id == int(split[0])
+                                    p for p in self.products if int(p.id) == int(split[0])
                                 ]
-                                if len(agent_to_talk) != 1:
-                                    prompt_message = "Product do not exist in environment"  # id should be unique
+                                if len(product_to_buy) != 1:
+                                    prompt_message = f"product do not exist in environment, valid IDs are [{','.join([str(p.id) for p in self.products])}]"  # id should be unique
                             elif len(split) == 2 and not split[1].isdigit():
-                                prompt_message = "Invalid buy additional data format, please only provide product id or product_id:id"
+                                prompt_message = "invalid buy additional data format, please only provide product id or product_id:id"
                             elif len(split) == 2 and split[1].isdigit():
                                 product_to_buy = [
-                                    p for p in self.products if p.id == int(split[1])
+                                    p for p in self.products if int(p.id) == int(split[1])
                                 ]
-                                if len(agent_to_talk) != 1:
-                                    prompt_message = "Product do not exist in environment"  # id should be unique
+                                if len(product_to_buy) != 1:
+                                    prompt_message = f"product do not exist in environment, valid IDs are [{','.join([str(p.id) for p in self.products])}]"  # id should be unique
                         if (
                             product_to_buy is None
                             or len(product_to_buy) != 1
-                            or not prompt_message
                         ):
+                            prompt_message = f"Attempted to buy product with id {data_bundle}, but {prompt_message}"
+                            print("Obtained invalid action, retrying:", prompt_message)
                             action = agent.get_action(
                                 self.env_desc,
                                 prompt_message,
@@ -151,23 +158,24 @@ class Simulation:
                         else:
                             # add BUY action to memory and also db
                             agent.add_to_memory(
-                                f"You bought Product {product_to_buy[0].name} with reason \"{action['additional_data_content']}\""
+                                f"You bought Product {product_to_buy[0].name} with reason \"{action['reason']}\""
                             )
                             # create the BUY event and yield it out to facilitate returning to backend
                             event = SimulationEvent.create(
                                 agent=agent_model,
                                 sim_id=self.id,
                                 type="BUY",
-                                content=f"{product_to_buy[0].id}:{action['additional_data_content']}",
+                                content=f"{product_to_buy[0].id}:{action['reason']}",
+                                cycle=self.cycle,
                             )
                             yield event
                             # generate feedback
                             feedback = self.simulation_response_helper(
-                                "BUY",
-                                action["additional_data_content"],
-                                self.env_desc,
-                                product_to_buy,
-                                agent,
+                                action="BUY",
+                                reason=action["additional_data_content"],
+                                env_desc=self.env_desc,
+                                product=product_to_buy[0],
+                                agent=agent,
                             )
                             agent.add_to_memory(feedback["feedback"])
                             feedback_event = SimulationEvent.create(
@@ -175,27 +183,29 @@ class Simulation:
                                 sim_id=self.id,
                                 type="ACTION_RESP",
                                 content=feedback["feedback"],
+                                cycle=self.cycle,
                             )
                             yield feedback_event
-                        break
+                            break
                     case "SKIP":
                         # add SKIP action to memory and also db
-                        agent.add_to_memory("You did not buy anything")
+                        agent.add_to_memory(f"You did not buy anything with reason \"{action['reason']}\"")
                         # create the SKIP event and yield it out to facilitate returning to backend
                         event = SimulationEvent.create(
                             agent=agent_model,
                             sim_id=self.id,
                             type="SKIP",
                             content="",
+                            cycle=self.cycle,
                         )
                         yield event
                         # generate feedback
                         feedback = self.simulation_response_helper(
-                            "SKIP",
-                            "",
-                            self.env_desc,
-                            product_to_buy,
-                            agent,
+                            action="SKIP",
+                            reason=action["reason"],
+                            env_desc=self.env_desc,
+                            product=None,
+                            agent=agent,
                         )
                         agent.add_to_memory(feedback["feedback"])
                         feedback_event = SimulationEvent.create(
@@ -203,6 +213,7 @@ class Simulation:
                             sim_id=self.id,
                             type="ACTION_RESP",
                             content=feedback["feedback"],
+                            cycle=self.cycle,
                         )
                         yield feedback_event
                         break
@@ -215,30 +226,32 @@ class Simulation:
                         # tolerate two cases: agent_id:id or id
                         if str(data_bundle).isdigit():
                             agent_to_talk = [
-                                a for a in self.agents if a.id == data_bundle
+                                a for a in self.agents if int(a.id) == int(data_bundle)
                             ]
                             if len(agent_to_talk) != 1:
-                                prompt_message = "Agent do not exist in environment"  # id should be unique
+                                prompt_message = f"agent do not exist in environment, valid IDs are [{','.join([str(a.id) for a in self.agents])}]"  # id should be unique
                         else:
                             split = data_bundle.split(":")
                             if len(split) > 2:
-                                prompt_message = "Invalid talk additional data format, please provide only the agent id or agent_id:id"
+                                prompt_message = "invalid message additional data format, please provide only the agent id or agent_id:id"
                             if len(split) == 1 and split[0].isdigit():
                                 agent_to_talk = [
-                                    a for a in self.agents if a.id == int(split[0])
+                                    a for a in self.agents if int(a.id) == int(split[0])
                                 ]
                                 if len(agent_to_talk) != 1:
-                                    prompt_message = "Agent do not exist in environment"  # id should be unique
+                                    prompt_message = f"agent do not exist in environment, , valid IDs are [{','.join([str(a.id) for a in self.agents])}]"  # id should be unique
                             elif len(split) == 2 and not split[1].isdigit():
-                                prompt_message = "Invalid talk additional data format, please provide only the agent id or agent_id:id"
+                                prompt_message = "invalid talk additional data format, please provide only the agent id or agent_id:id"
                             elif len(split) == 2 and split[1].isdigit():
                                 agent_to_talk = [
-                                    a for a in self.agents if a.id == int(split[1])
+                                    a for a in self.agents if int(a.id) == int(split[1])
                                 ]
                                 if len(agent_to_talk) != 1:
-                                    prompt_message = "Agent do not exist in environment"  # id should be unique
+                                    prompt_message = f"agent do not exist in environment, , valid IDs are [{','.join([str(a.id) for a in self.agents])}]"  # id should be unique
 
-                        if agent_to_talk is None or len(agent_to_talk) == 0:
+                        if agent_to_talk is None or len(agent_to_talk) != 1:
+                            prompt_message = f"Attempted to message agent with id {data_bundle}, but {prompt_message}"
+                            print("Obtained invalid action, retrying:", prompt_message)
                             action = agent.get_action(
                                 self.env_desc,
                                 prompt_message,
@@ -259,10 +272,11 @@ class Simulation:
                                 sim_id=self.id,
                                 type="MESSAGE",
                                 content=f"{agent_to_talk[0].id}:{action['additional_data_content']}",
+                                cycle=self.cycle,
                             )
                             yield event
                             # agent_to_talk model
-                            agent_model_next = AgentInfo.create(agent_id=agent_to_talk.id[0], sim_id=self.id, rewritten_desc=agent_to_talk[0].sim_desc, rewritten_desc_third_person=agent_to_talk[0].sim_desc_3rd)
+                            agent_model_next = AgentInfo.select().where(AgentInfo.agent_id == agent_to_talk[0].id)
                             action_next = agent_to_talk[0].get_talk_response(
                                 self.env_desc, prompt_message, self.products, [agent]
                             )  # message obtained from other agent, reforward to this agent and can rerun this big while loop
@@ -270,13 +284,14 @@ class Simulation:
                                 agent=agent_model_next,
                                 sim_id=self.id,
                                 type="MESSAGE",
-                                content=f"{agent.id}:{action['additional_data_content']}"
+                                content=f"{agent.id}:{action_next['message']}",
+                                cycle=self.cycle,
                             )
                             yield reply_event
                             # can no need care if it's return to this agent d, just forward back
                             action = agent.get_action(
                                 self.env_desc,
-                                f"Agent {agent_to_talk[0].id} replies you:{action_next['additional_data_content']}",
+                                f"Agent {agent_to_talk[0].id} replies you:{action_next['message']}",
                                 self.products,
                                 self.agents,
                                 should_add_memory=True,
@@ -290,6 +305,7 @@ class Simulation:
         while self.cycle <= self.total_cycle:
             for event in self.proceed_cycle():
                 yield event
+
 
 # helper object to get structured response
 class SimulationActionResp(BaseModel):

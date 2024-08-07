@@ -27,16 +27,23 @@ class AgentAttributeRewrite(BaseModel):
 def get_agent_desc_rewrite(
     name: str, desc: str, attrs: list[AgentAttribute]
 ) -> dict[str, str]:
-    llm = Ollama(model="llama3.1", format="json")
+    llm = Ollama(model="llama3.1", format="json", stop=["<|eot_id|>"])
     parser = JsonOutputParser(pydantic_object=AgentAttributeRewrite)
     kvInStr = f"[{",".join([attr.string() for attr in attrs])}]"
     prompt = PromptTemplate(
-        template="{action}.\n{format_instructions}",
+        template="""
+            <|begin_of_text|>
+            <|start_header_id|>system<|end_header_id|>
+            You are a simulation manager of a simulator that simulates consumer behavior with LLM agents. You are tasked to give the agents about their roles by performing the action.
+            Response format: {format_instructions}
+            <|eot_id|>
+            Action: {action}
+        """,
         input_variables=["action"],
         partial_variables={"format_instructions": parser.get_format_instructions()},
     )
 
-    rewrite_desc = f"Rewrite {desc} to create an agent named {name} that is in a simulation in a second person point of view, start with 'You are in a simulation with other agents as {name},'"
+    rewrite_desc = f"Rewrite {desc} to create an agent named {name} that is in a simulation in a second person point of view, start with 'You are in a simulation with other agents and you act as {name},'"
     rewrite_attr_second_person = f"Given the following {{key,value}} pairs in a list {kvInStr}, write a paragraph in a second person point of view, try to fit everything in a short paragraph, do not include special characters in the description"
     chain = prompt | llm | parser
     invalid_characters = [
@@ -62,16 +69,20 @@ def get_agent_desc_rewrite(
         ["description"],
         additional_check=add_check,
     )
-    rewrite_second_person = res_desc["description"].strip() + " " + res["description"].strip()
+    rewrite_second_person = (
+        res_desc["description"].strip() + " " + res["description"].strip()
+    )
 
     # rewrite again in 3rd person point of view so can provide to feedback agent
-    rewrite_third_person_prompt = f"Rewrite '{rewrite_second_person}' in a third person point of view"
+    rewrite_third_person_prompt = (
+        f"Rewrite '{rewrite_second_person}' in a third person point of view"
+    )
     # rewriting description for agent in third person view
     res_3rd = get_chain_response_json(
         chain,
         {"action": rewrite_third_person_prompt},
         ["description"],
-        additional_check=add_check
+        additional_check=add_check,
     )
 
     return {
@@ -84,11 +95,16 @@ class AgentAction(BaseModel):
     action: str = Field("the action to take")
     reason: str = Field("the reason for the action taken")
     additional_data_id: int = Field(
-        "additional data id to complete the action, for action MESSAGE, write agent_id, for action BUY, write product_id, for SKIP, write 0"
+        "additional data id to complete the action, for action MESSAGE, write the agent_id (eg. 1), for action BUY, write the product_id (eg. 1), for SKIP, write 0"
     )
     additional_data_content: str = Field(
         "additional data content to complete the action, for action BUY, write name of the product, for action MESSAGE, write the message, for SKIP, write the reason"
     )
+
+
+# model seems very suka response with only message and not action etc, just craft one class since agent id wont be used anyways
+class MessageResponse(BaseModel):
+    message: str = Field("the message to send back")
 
 
 class Agent:
@@ -105,12 +121,12 @@ class Agent:
             <|begin_of_text|>
             <|start_header_id|>system<|end_header_id|>
             {system_prompt}
-            Please only take actions given in the valid actions list.
-            {format_instructions}
+            Response format:{format_instructions}
             <|eot_id|>
             Valid agents:{agents}
             Valid products:{products}
             Valid actions:{actions}
+            Please only take actions in the valid actions list, buy only products in the valid products list, message only agents in the valid agent list.
             {memory}
         """,
         input_variables=["system_prompt", "memory", "agents", "products", "actions"],
@@ -158,7 +174,7 @@ class Agent:
                 agent_id=self.id,
                 sim_id=self.simulation_id,
                 rewritten_desc=self.sim_desc,
-                rewritten_desc_third_person=self.sim_desc_3rd
+                rewritten_desc_third_person=self.sim_desc_3rd,
             )
         else:
             # already has record in db
@@ -199,7 +215,10 @@ class Agent:
             self.chain,
             {
                 "system_prompt": f"{env_desc}\n{self.sim_desc}",
-                "memory": "\n".join(self.memory) + message if not should_add_memory else "", # if no add to memory, just append as part of the prompt
+                "memory": "\n".join(self.memory)
+                + (
+                    message if not should_add_memory else ""
+                ),  # if no add to memory, just append as part of the prompt
                 "agents": f"[{','.join([agent.to_prompt_str() for agent in agents])}]",
                 "products": f"[{';'.join([product.to_prompt_str() for product in products])}]",
                 "actions": f"[{';'.join([f'{k}:{v}' for k, v in (actions.items())])}]",
@@ -217,8 +236,36 @@ class Agent:
         self, env_desc: str, message: str, products: list[Product], agents: list[Self]
     ):
         self.add_to_memory(message)
-        available_actions = {"MESSAGE": self.actions["MESSAGE"]}
-        return self.get_action(env_desc, message, products, agents, available_actions)
+        # create a specialised chain only for responding back to the message
+        llm = Ollama(
+            model=self.model,
+            stop=["<|eot_id|>"],  # might need to change this when switch model
+            format="json",
+        )
+        parser = JsonOutputParser(pydantic_object=MessageResponse)
+        prompt = PromptTemplate(
+            template="""
+                <|begin_of_text|>
+                <|start_header_id|>system<|end_header_id|>
+                {system_prompt}
+                Response format:{format_instructions}
+                <|eot_id|>
+                {memory}
+            """,
+            input_variables=["system_prompt", "memory"],
+            partial_variables={
+                "format_instructions": parser.get_format_instructions(),
+            },
+        )
+        chain = prompt | llm | parser
+        return get_chain_response_json(
+            chain,
+            {
+                "system_prompt": f"{env_desc}\n{self.sim_desc}",
+                "memory": "\n".join(self.memory),
+            },
+            expected_fields=["message"], 
+        )
 
     # add to agent's memory
     def add_to_memory(self, mem: str):

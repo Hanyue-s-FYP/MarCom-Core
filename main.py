@@ -58,7 +58,7 @@ def main():
     simulation = Simulation(id=1, env_desc=testEnv, agents=[testAgent, testAgent2], products=[product1, product2], total_cycle=5)
     simulation.init_simulation()
     for event in simulation.run_simulation():
-        print(event, f"Agent ID: {event.agent.agent_id if event.agent is not None else -1}, Sim ID: {event.sim_id}, Type: {event.type}, Content: {event.content}, Time: {event.time_created}")
+        print(event, f"Agent ID: {event.agent.agent_id if event.agent is not None else -1}, Sim ID: {event.sim_id}, Cycle: {event.cycle}, Type: {event.type}, Content: {event.content}, Time: {event.time_created}")
 
 def init_simulation_servicer():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
