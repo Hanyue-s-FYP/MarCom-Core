@@ -195,7 +195,7 @@ class Agent:
             .order_by(AgentMemory.time_created)
         )
         for mem in memory_query:
-            self.memory.append(mem.content)
+            self.add_to_memory(mem.content, save_to_db=False) # alrd in db d the memory
             print(self.memory)
         llm = Ollama(
             model=self.model,
@@ -286,11 +286,12 @@ class Agent:
         )
 
     # add to agent's memory
-    def add_to_memory(self, mem: str):
+    def add_to_memory(self, mem: str, save_to_db: bool = True):
         self.memory.append(mem)
         self.memory = self.memory[-30:] # sliding window (context too less, so only take last 30 otherwise system prompt might get overwritten)
-        # write to db as well
-        AgentMemory.create(agent=self.agent_model, content=mem)
+        # write to db as well (if is not called when init agent)
+        if save_to_db:
+            AgentMemory.create(agent=self.agent_model, content=mem)
 
     # if using model that are more powerful maybe can include short description of the agent for more context
     def to_prompt_str(self):
