@@ -23,8 +23,8 @@ def main():
     print(f"Database initialized")
 
     # start grpc server
-    print("Initialise grpc simulation servicer")
-    init_simulation_servicer()
+    # print("Initialise grpc simulation servicer")
+    # init_simulation_servicer()
 
     testAttrs = [
         AgentAttribute("Priority", "Scoring top marks"),
@@ -55,7 +55,7 @@ def main():
         cost=120.00,  # Assuming a cost for the tuition center
         simulation_id=1
     )
-    simulation = Simulation(id=1, env_desc=testEnv, agents=[testAgent, testAgent2], products=[product1, product2], total_cycle=5)
+    simulation = Simulation(id=1, env_desc=testEnv, agents=[testAgent, testAgent2], products=[product1, product2], total_cycle=3)
     simulation.init_simulation()
     for event in simulation.run_simulation():
         print(event, f"Agent ID: {event.agent.agent_id if event.agent is not None else -1}, Sim ID: {event.sim_id}, Cycle: {event.cycle}, Type: {event.type}, Content: {event.content}, Time: {event.time_created}")
