@@ -23,8 +23,8 @@ def main():
     print(f"Database initialized")
 
     # start grpc server
-    # print("Initialise grpc simulation servicer")
-    # init_simulation_servicer()
+    print("Initialise grpc simulation servicer")
+    init_core_servicer()
 
     testAttrs = [
         AgentAttribute("Priority", "Scoring top marks"),
@@ -60,7 +60,7 @@ def main():
     for event in simulation.run_simulation():
         print(event, f"Agent ID: {event.agent.agent_id if event.agent is not None else -1}, Sim ID: {event.sim_id}, Cycle: {event.cycle}, Type: {event.type}, Content: {event.content}, Time: {event.time_created}")
 
-def init_simulation_servicer():
+def init_core_servicer():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     marcom_core_pb2_grpc.add_MarcomServiceServicer_to_server(MarcomCoreServicer(), server)
     server.add_insecure_port(f"[::]:{os.getenv('GRPC_CONNECTION_PORT')}")
