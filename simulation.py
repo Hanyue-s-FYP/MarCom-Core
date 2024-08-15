@@ -7,7 +7,7 @@ from langchain_community.llms import Ollama
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.prompts import PromptTemplate
 
-from utils import get_chain_response_json
+from utils import get_chain_response_json, get_format_instruction_of_pydantic_object
 
 class Simulation:
     # total_cycle is negative means should run infinitely
@@ -84,7 +84,7 @@ class Simulation:
                 "action_reason",
             ],
             partial_variables={
-                "format_instructions": parser.get_format_instructions(),
+                "format_instructions": get_format_instruction_of_pydantic_object(SimulationActionResp),
                 "should_positive": "positive" if should_positive else "negative",
                 "should_positive_enforcement": "The event should clearly benefit the agent." if should_positive else "The event should clearly harm the agent without any potential for positive interpretation."
             },
@@ -141,7 +141,7 @@ class Simulation:
                                 ]
                                 if len(product_to_buy) != 1:
                                     prompt_message = f"product do not exist in environment, valid IDs are [{','.join([str(p.id) for p in self.products])}]"  # id should be unique
-                            elif len(split) == 2 and not split[1].isdigit():
+                            elif len(split) == 2 and not split[1].isdigit() or len(split) != 2:
                                 prompt_message = "invalid buy additional data format, please only provide product id or product_id:id"
                             elif len(split) == 2 and split[1].isdigit():
                                 product_to_buy = [
@@ -246,7 +246,7 @@ class Simulation:
                                 ]
                                 if len(agent_to_talk) != 1:
                                     prompt_message = f"agent do not exist in environment, , valid IDs are [{','.join([str(a.id) for a in self.agents])}]"  # id should be unique
-                            elif len(split) == 2 and not split[1].isdigit():
+                            elif len(split) == 2 and not split[1].isdigit() or len(split) != 2:
                                 prompt_message = "invalid talk additional data format, please provide only the agent id or agent_id:id"
                             elif len(split) == 2 and split[1].isdigit():
                                 agent_to_talk = [

@@ -98,11 +98,11 @@ class AgentAction(BaseModel):
     reason: str = Field("", description="the reason for the action taken")
     additional_data_id: int = Field(
         "", 
-        description="additional data id to complete the action, for action MESSAGE, write the agent_id (eg. 1), for action BUY, write the product_id (eg. 1), for SKIP, write 0"
+        description="additional data id to complete the action, for action MESSAGE, write the id of the agent (eg. 1), for action BUY, write the id of the product(eg. 1), for SKIP, write 0 as the value for this key"
     )
     additional_data_content: str = Field(
         "",
-        description="additional data content to complete the action, for action BUY, write name of the product, for action MESSAGE, write the message, for SKIP, write the reason"
+        description="additional data content to complete the action, for action BUY, write name of the product, for action MESSAGE, write the message, for SKIP, write the reason as the value for this key"
     )
 
 
@@ -125,7 +125,7 @@ class Agent:
             <|begin_of_text|>
             <|start_header_id|>system<|end_header_id|>
             {system_prompt}
-            Response format:{format_instructions}
+            {format_instructions}
             <|eot_id|>
             Valid agents:{agents}
             Valid products:{products}
@@ -196,6 +196,7 @@ class Agent:
         )
         for mem in memory_query:
             self.memory.append(mem.content)
+            print(self.memory)
         llm = Ollama(
             model=self.model,
             stop=["<|eot_id|>"],  # might need to change this when switch model
@@ -220,9 +221,11 @@ class Agent:
         def action_check(res):
             # check if all is of str type (additional_id can be string or int)
             for k in res:
+                if res["action"] is str and res["action"] == "SKIP":
+                    break
                 if k == "additional_data_id" and not (type(res[k]) is str or type(res[k]) is int):
                     return False
-                elif type(res[k]) is not str:
+                elif k != "additional_data_id" and type(res[k]) is not str:
                     return False
             # noneed care about case (LLM output is very hard to control)
             return res["action"].upper() in actions and res["reason"] != ""
@@ -230,11 +233,11 @@ class Agent:
             self.chain,
             {
                 "system_prompt": f"{env_desc}\n{self.sim_desc}",
-                "memory": "\n".join(self.memory)
+                "memory": "\n".join(self.memory) 
                 + (
-                    message if not should_add_memory else ""
+                    f"\n{message}" if not should_add_memory else ""
                 ),  # if no add to memory, just append as part of the prompt
-                "agents": f"[{','.join([agent.to_prompt_str() for agent in agents])}]",
+                "agents": f"[{','.join([agent.to_prompt_str() for agent in agents if int(agent.id) != int(self.id)])}]",
                 "products": f"[{';'.join([product.to_prompt_str() for product in products])}]",
                 "actions": f"[{';'.join([f'{k}:{v}' for k, v in (actions.items())])}]",
             },
@@ -261,7 +264,7 @@ class Agent:
                 <|begin_of_text|>
                 <|start_header_id|>system<|end_header_id|>
                 {system_prompt}
-                Response format:{format_instructions}
+                {format_instructions}
                 <|eot_id|>
                 {memory}
             """,
@@ -285,6 +288,7 @@ class Agent:
     # add to agent's memory
     def add_to_memory(self, mem: str):
         self.memory.append(mem)
+        self.memory = self.memory[-20:] # sliding window (context too less, so only take last 20 otherwise system prompt might get overwritten)
         # write to db as well
         AgentMemory.create(agent=self.agent_model, content=mem)
 
