@@ -240,9 +240,6 @@ class Agent:
             },
             expected_fields=[k for k in (AgentAction.model_json_schema()["properties"])],
             additional_check=action_check,
-            additional_check=lambda res: (
-                type(res["action"]) is str and res["action"].upper() in actions
-            ),  # noneed care about case (LLM output is very hard to control)
         )
         return action
 
