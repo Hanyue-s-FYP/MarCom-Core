@@ -288,7 +288,7 @@ class Agent:
     # add to agent's memory
     def add_to_memory(self, mem: str):
         self.memory.append(mem)
-        self.memory = self.memory[-20:] # sliding window (context too less, so only take last 20 otherwise system prompt might get overwritten)
+        self.memory = self.memory[-30:] # sliding window (context too less, so only take last 30 otherwise system prompt might get overwritten)
         # write to db as well
         AgentMemory.create(agent=self.agent_model, content=mem)
 

@@ -235,7 +235,7 @@ class Simulation:
                                 a for a in self.agents if int(a.id) == int(data_bundle)
                             ]
                             if len(agent_to_talk) != 1:
-                                prompt_message = f"agent do not exist in environment, valid IDs are [{','.join([str(a.id) for a in self.agents])}]"  # id should be unique
+                                prompt_message = f"agent do not exist in environment, valid IDs are [{','.join([str(a.id) for a in self.agents if int(a.id) != agent.id])}]"  # id should be unique
                         else:
                             split = data_bundle.split(":")
                             if len(split) > 2:
@@ -245,7 +245,7 @@ class Simulation:
                                     a for a in self.agents if int(a.id) == int(split[0])
                                 ]
                                 if len(agent_to_talk) != 1:
-                                    prompt_message = f"agent do not exist in environment, , valid IDs are [{','.join([str(a.id) for a in self.agents])}]"  # id should be unique
+                                    prompt_message = f"agent do not exist in environment, , valid IDs are [{','.join([str(a.id) for a in self.agents if int(a.id) != agent.id])}]"  # id should be unique
                             elif len(split) == 2 and not split[1].isdigit() or len(split) != 2:
                                 prompt_message = "invalid talk additional data format, please provide only the agent id or agent_id:id"
                             elif len(split) == 2 and split[1].isdigit():
@@ -253,7 +253,10 @@ class Simulation:
                                     a for a in self.agents if int(a.id) == int(split[1])
                                 ]
                                 if len(agent_to_talk) != 1:
-                                    prompt_message = f"agent do not exist in environment, , valid IDs are [{','.join([str(a.id) for a in self.agents])}]"  # id should be unique
+                                    prompt_message = f"agent do not exist in environment, , valid IDs are [{','.join([str(a.id) for a in self.agents if int(a.id) != agent.id])}]"  # id should be unique
+
+                        if (len(agent_to_talk) == 1 and int(agent_to_talk[0].id) == int(agent.id)):
+                            prompt_message = f"you cannot message yourself, valid IDs are [{','.join([str(a.id) for a in self.agents if int(a.id) != agent.id])}]"
 
                         if agent_to_talk is None or len(agent_to_talk) != 1:
                             prompt_message = f"Attempted to message agent with id {data_bundle}, but {prompt_message}"
