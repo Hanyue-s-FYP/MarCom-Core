@@ -196,7 +196,6 @@ class Agent:
         )
         for mem in memory_query:
             self.add_to_memory(mem.content, save_to_db=False) # alrd in db d the memory
-            print(self.memory)
         llm = Ollama(
             model=self.model,
             stop=["<|eot_id|>"],  # might need to change this when switch model
@@ -287,6 +286,7 @@ class Agent:
 
     # add to agent's memory
     def add_to_memory(self, mem: str, save_to_db: bool = True):
+        print("Add to memory:", mem)
         self.memory.append(mem)
         self.memory = self.memory[-30:] # sliding window (context too less, so only take last 30 otherwise system prompt might get overwritten)
         # write to db as well (if is not called when init agent)
