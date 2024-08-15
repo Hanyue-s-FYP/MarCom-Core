@@ -3,12 +3,12 @@ import logging
 import os
 
 import grpc
-from SimulationServicer import SimulationServicer
+from MarcomCoreServicer import MarcomCoreServicer
 from agent import Agent, AgentAttribute
 from product import Product
 from simulation import Simulation
 from dotenv import load_dotenv
-from proto_simulation import simulation_pb2_grpc
+from proto import marcom_core_pb2_grpc
 
 from db import *
 
@@ -23,8 +23,8 @@ def main():
     print(f"Database initialized")
 
     # start grpc server
-    # print("Initialise grpc simulation servicer")
-    # init_simulation_servicer()
+    print("Initialise grpc simulation servicer")
+    init_simulation_servicer()
 
     testAttrs = [
         AgentAttribute("Priority", "Scoring top marks"),
@@ -62,8 +62,8 @@ def main():
 
 def init_simulation_servicer():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    simulation_pb2_grpc.add_SimulationServiceServicer_to_server(SimulationServicer(), server)
-    server.add_insecure_port(f"[::]:{os.getenv('GRPC_SIMULATION_PORT')}")
+    marcom_core_pb2_grpc.add_MarcomServiceServicer_to_server(MarcomCoreServicer(), server)
+    server.add_insecure_port(f"[::]:{os.getenv('GRPC_CONNECTION_PORT')}")
     server.start()
     server.wait_for_termination()
 

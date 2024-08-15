@@ -9,7 +9,6 @@ from langchain_core.prompts import PromptTemplate
 
 from utils import get_chain_response_json
 
-
 class Simulation:
     # total_cycle is negative means should run infinitely
     def __init__(
@@ -27,6 +26,7 @@ class Simulation:
         self.total_cycle = total_cycle
         self.cycle = 1
         self.inited = False
+        self.paused = False
 
     def init_simulation(self):
         # actually initialising the agents
@@ -47,6 +47,12 @@ class Simulation:
                     cycle=self.cycle,
                 )
         self.inited = True
+
+    def pause_simulation(self):
+        self.paused = True
+
+    def resume_simulation(self):
+        self.paused = False
 
     # use another LLM and generate events for feedbacks on "BUY" and "SKIP" actions
     # also provide the product details and maybe the agent description so the LLM can get more context

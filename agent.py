@@ -40,7 +40,7 @@ def get_agent_desc_rewrite(
             Action: {action}
         """,
         input_variables=["action"],
-        partial_variables={"format_instructions": parser.get_format_instructions()},
+        partial_variables={"format_instructions": "JSON object with a single field 'description' where it's value is the rewritten paragraph"},
     )
 
     rewrite_desc = f"Rewrite {desc} to create an agent named {name} that is in a simulation in a second person point of view, start with 'You are in a simulation with other agents and you act as {name},'"

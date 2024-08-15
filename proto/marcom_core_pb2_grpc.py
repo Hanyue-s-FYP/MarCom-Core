@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-from proto_simulation import simulation_pb2 as proto__simulation_dot_simulation__pb2
+from proto import marcom_core_pb2 as proto_dot_marcom__core__pb2
 
 GRPC_GENERATED_VERSION = '1.65.4'
 GRPC_VERSION = grpc.__version__
@@ -20,7 +20,7 @@ except ImportError:
 if _version_not_supported:
     warnings.warn(
         f'The grpc package installed is at version {GRPC_VERSION},'
-        + f' but the generated code in proto_simulation/simulation_pb2_grpc.py depends on'
+        + f' but the generated code in proto/marcom_core_pb2_grpc.py depends on'
         + f' grpcio>={GRPC_GENERATED_VERSION}.'
         + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
         + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
@@ -30,7 +30,7 @@ if _version_not_supported:
     )
 
 
-class SimulationServiceStub(object):
+class MarcomServiceStub(object):
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -40,23 +40,28 @@ class SimulationServiceStub(object):
             channel: A grpc.Channel.
         """
         self.StartSimulation = channel.unary_unary(
-                '/simulation.SimulationService/StartSimulation',
-                request_serializer=proto__simulation_dot_simulation__pb2.SimulationRequest.SerializeToString,
-                response_deserializer=proto__simulation_dot_simulation__pb2.SimulationResponse.FromString,
+                '/simulation.MarcomService/StartSimulation',
+                request_serializer=proto_dot_marcom__core__pb2.SimulationRequest.SerializeToString,
+                response_deserializer=proto_dot_marcom__core__pb2.SimulationResponse.FromString,
                 _registered_method=True)
         self.PauseSimulation = channel.unary_unary(
-                '/simulation.SimulationService/PauseSimulation',
-                request_serializer=proto__simulation_dot_simulation__pb2.PauseRequest.SerializeToString,
-                response_deserializer=proto__simulation_dot_simulation__pb2.PauseResponse.FromString,
+                '/simulation.MarcomService/PauseSimulation',
+                request_serializer=proto_dot_marcom__core__pb2.PauseRequest.SerializeToString,
+                response_deserializer=proto_dot_marcom__core__pb2.PauseResponse.FromString,
                 _registered_method=True)
-        self.StreamUpdates = channel.unary_stream(
-                '/simulation.SimulationService/StreamUpdates',
-                request_serializer=proto__simulation_dot_simulation__pb2.StreamRequest.SerializeToString,
-                response_deserializer=proto__simulation_dot_simulation__pb2.SimulationUpdate.FromString,
+        self.StreamSimulationUpdates = channel.unary_stream(
+                '/simulation.MarcomService/StreamSimulationUpdates',
+                request_serializer=proto_dot_marcom__core__pb2.StreamRequest.SerializeToString,
+                response_deserializer=proto_dot_marcom__core__pb2.SimulationUpdate.FromString,
+                _registered_method=True)
+        self.ResearchProductCompetitor = channel.unary_unary(
+                '/simulation.MarcomService/ResearchProductCompetitor',
+                request_serializer=proto_dot_marcom__core__pb2.Product.SerializeToString,
+                response_deserializer=proto_dot_marcom__core__pb2.ProductCompetitorResponse.FromString,
                 _registered_method=True)
 
 
-class SimulationServiceServicer(object):
+class MarcomServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def StartSimulation(self, request, context):
@@ -71,39 +76,50 @@ class SimulationServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def StreamUpdates(self, request, context):
+    def StreamSimulationUpdates(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ResearchProductCompetitor(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
 
-def add_SimulationServiceServicer_to_server(servicer, server):
+def add_MarcomServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'StartSimulation': grpc.unary_unary_rpc_method_handler(
                     servicer.StartSimulation,
-                    request_deserializer=proto__simulation_dot_simulation__pb2.SimulationRequest.FromString,
-                    response_serializer=proto__simulation_dot_simulation__pb2.SimulationResponse.SerializeToString,
+                    request_deserializer=proto_dot_marcom__core__pb2.SimulationRequest.FromString,
+                    response_serializer=proto_dot_marcom__core__pb2.SimulationResponse.SerializeToString,
             ),
             'PauseSimulation': grpc.unary_unary_rpc_method_handler(
                     servicer.PauseSimulation,
-                    request_deserializer=proto__simulation_dot_simulation__pb2.PauseRequest.FromString,
-                    response_serializer=proto__simulation_dot_simulation__pb2.PauseResponse.SerializeToString,
+                    request_deserializer=proto_dot_marcom__core__pb2.PauseRequest.FromString,
+                    response_serializer=proto_dot_marcom__core__pb2.PauseResponse.SerializeToString,
             ),
-            'StreamUpdates': grpc.unary_stream_rpc_method_handler(
-                    servicer.StreamUpdates,
-                    request_deserializer=proto__simulation_dot_simulation__pb2.StreamRequest.FromString,
-                    response_serializer=proto__simulation_dot_simulation__pb2.SimulationUpdate.SerializeToString,
+            'StreamSimulationUpdates': grpc.unary_stream_rpc_method_handler(
+                    servicer.StreamSimulationUpdates,
+                    request_deserializer=proto_dot_marcom__core__pb2.StreamRequest.FromString,
+                    response_serializer=proto_dot_marcom__core__pb2.SimulationUpdate.SerializeToString,
+            ),
+            'ResearchProductCompetitor': grpc.unary_unary_rpc_method_handler(
+                    servicer.ResearchProductCompetitor,
+                    request_deserializer=proto_dot_marcom__core__pb2.Product.FromString,
+                    response_serializer=proto_dot_marcom__core__pb2.ProductCompetitorResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'simulation.SimulationService', rpc_method_handlers)
+            'simulation.MarcomService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('simulation.SimulationService', rpc_method_handlers)
+    server.add_registered_method_handlers('simulation.MarcomService', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
-class SimulationService(object):
+class MarcomService(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
@@ -120,9 +136,9 @@ class SimulationService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/simulation.SimulationService/StartSimulation',
-            proto__simulation_dot_simulation__pb2.SimulationRequest.SerializeToString,
-            proto__simulation_dot_simulation__pb2.SimulationResponse.FromString,
+            '/simulation.MarcomService/StartSimulation',
+            proto_dot_marcom__core__pb2.SimulationRequest.SerializeToString,
+            proto_dot_marcom__core__pb2.SimulationResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -147,9 +163,9 @@ class SimulationService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/simulation.SimulationService/PauseSimulation',
-            proto__simulation_dot_simulation__pb2.PauseRequest.SerializeToString,
-            proto__simulation_dot_simulation__pb2.PauseResponse.FromString,
+            '/simulation.MarcomService/PauseSimulation',
+            proto_dot_marcom__core__pb2.PauseRequest.SerializeToString,
+            proto_dot_marcom__core__pb2.PauseResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -161,7 +177,7 @@ class SimulationService(object):
             _registered_method=True)
 
     @staticmethod
-    def StreamUpdates(request,
+    def StreamSimulationUpdates(request,
             target,
             options=(),
             channel_credentials=None,
@@ -174,9 +190,36 @@ class SimulationService(object):
         return grpc.experimental.unary_stream(
             request,
             target,
-            '/simulation.SimulationService/StreamUpdates',
-            proto__simulation_dot_simulation__pb2.StreamRequest.SerializeToString,
-            proto__simulation_dot_simulation__pb2.SimulationUpdate.FromString,
+            '/simulation.MarcomService/StreamSimulationUpdates',
+            proto_dot_marcom__core__pb2.StreamRequest.SerializeToString,
+            proto_dot_marcom__core__pb2.SimulationUpdate.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ResearchProductCompetitor(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/simulation.MarcomService/ResearchProductCompetitor',
+            proto_dot_marcom__core__pb2.Product.SerializeToString,
+            proto_dot_marcom__core__pb2.ProductCompetitorResponse.FromString,
             options,
             channel_credentials,
             insecure,

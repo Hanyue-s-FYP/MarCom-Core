@@ -64,7 +64,7 @@ report_prompt = PromptTemplate(
     A user will provide information (which may include name, description and price) about a product that may or may not exist in the market and wants to find similar products that may be of competition to that product.
     Strictly use the following pieces of web search context to determine if which products would be able to compete with the user's product and why so. If you don't know the answer, just say that you don't know. 
     Keep the answer concise, but provide all of the details you can in the form of a research report. 
-    Only make direct references to material if provided in the context. Cite the references to the material together with the link in the end of the report. Strip any preambles and dive straight into the possible competitors.
+    Only make direct references to material provided in the context. Cite the references to the material together with the link in the end of the report. Strip any preambles and dive straight into the possible competitors.
     <|eot_id|>
     <|start_header_id|>user<|end_header_id|>
     Product Information: 

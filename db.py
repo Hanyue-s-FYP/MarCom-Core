@@ -29,7 +29,7 @@ class AgentMemory(Model):
 
 # store a copy of the events of the simulation here (also will be forwarded back to web server)
 class SimulationEvent(Model):
-    agent = ForeignKeyField(AgentInfo, backref="events", null=True) # agents only exist if event type is of ACTION event
+    agent = ForeignKeyField(AgentInfo, backref="events", null=True) # agents only exist if event type is of ACTION event (eg., BUY/SKIP/MESSAGE, ACTION_RESP)
     sim_id = IntegerField()
     type = TextField() # (BUY/SKIP/MESSAGE): agent takes action, SIMULATION: high level simulation related events, like initializing agent, ACTION_RESP: response to BUY actions of an agent
     content = TextField() # additional information about the event (where the actual message resides) for BUY format is PRODUCT_ID:REASON, for MESSAGE format is AGENT_ID:CONTENT
