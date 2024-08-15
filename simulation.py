@@ -105,14 +105,15 @@ class Simulation:
     # progresses the cycle
     def proceed_cycle(self):
         for agent in self.agents:
-            prompt_message = f"Cycle {self.cycle} start"
+            agent.add_to_memory(f"Cycle {self.cycle} start")
+        for agent in self.agents:
+            prompt_message = f"What action would you like to perform?"
             # obtaining action from agent
             action = agent.get_action(
                 self.env_desc,
                 prompt_message,
                 self.products,
                 self.agents,
-                should_add_memory=True,
             )
             agent_model = AgentInfo.select().where(AgentInfo.agent_id == agent.id)
             # talk can go for very long
