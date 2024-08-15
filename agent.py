@@ -7,7 +7,7 @@ from langchain_core.prompts import PromptTemplate
 
 from db import AgentInfo, AgentMemory
 from product import Product
-from utils import get_chain_response_json
+from utils import get_chain_response_json, get_format_instruction_of_pydantic_object
 
 
 class AgentAttribute:
@@ -35,12 +35,14 @@ def get_agent_desc_rewrite(
             <|begin_of_text|>
             <|start_header_id|>system<|end_header_id|>
             You are a simulation manager of a simulator that simulates consumer behavior with LLM agents. You are tasked to give the agents about their roles by performing the action.
-            Response format: {format_instructions}
+            {format_instructions}
             <|eot_id|>
             Action: {action}
         """,
         input_variables=["action"],
-        partial_variables={"format_instructions": "JSON object with a single field 'description' where it's value is the rewritten paragraph"},
+        partial_variables={
+            "format_instructions": "Respond with a JSON object with a single field 'description' where it's value is the output of the performed action."
+        },
     )
 
     rewrite_desc = f"Rewrite {desc} to create an agent named {name} that is in a simulation in a second person point of view, start with 'You are in a simulation with other agents and you act as {name},'"
@@ -92,19 +94,19 @@ def get_agent_desc_rewrite(
 
 
 class AgentAction(BaseModel):
-    action: str = Field("the action to take")
-    reason: str = Field("the reason for the action taken")
+    action: str = Field(description="the action to take")
+    reason: str = Field(description="the reason for the action taken")
     additional_data_id: int = Field(
-        "additional data id to complete the action, for action MESSAGE, write the agent_id (eg. 1), for action BUY, write the product_id (eg. 1), for SKIP, write 0"
+        description="additional data id to complete the action, for action MESSAGE, write the agent_id (eg. 1), for action BUY, write the product_id (eg. 1), for SKIP, write 0"
     )
     additional_data_content: str = Field(
-        "additional data content to complete the action, for action BUY, write name of the product, for action MESSAGE, write the message, for SKIP, write the reason"
+        description="additional data content to complete the action, for action BUY, write name of the product, for action MESSAGE, write the message, for SKIP, write the reason"
     )
 
 
 # model seems very suka response with only message and not action etc, just craft one class since agent id wont be used anyways
 class MessageResponse(BaseModel):
-    message: str = Field("the message to send back")
+    message: str = Field(description="the message to send back")
 
 
 class Agent:
@@ -131,7 +133,9 @@ class Agent:
         """,
         input_variables=["system_prompt", "memory", "agents", "products", "actions"],
         partial_variables={
-            "format_instructions": parser.get_format_instructions(),
+            "format_instructions": get_format_instruction_of_pydantic_object(
+                AgentAction
+            ),
         },
     )
 
@@ -254,7 +258,9 @@ class Agent:
             """,
             input_variables=["system_prompt", "memory"],
             partial_variables={
-                "format_instructions": parser.get_format_instructions(),
+                "format_instructions": get_format_instruction_of_pydantic_object(
+                    MessageResponse
+                ),
             },
         )
         chain = prompt | llm | parser
@@ -264,7 +270,7 @@ class Agent:
                 "system_prompt": f"{env_desc}\n{self.sim_desc}",
                 "memory": "\n".join(self.memory),
             },
-            expected_fields=["message"], 
+            expected_fields=["message"],
         )
 
     # add to agent's memory
