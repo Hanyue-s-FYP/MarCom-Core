@@ -35,6 +35,6 @@ def get_format_instruction_of_pydantic_object(o: Type[BaseModel]):
     schema = o.model_json_schema()
     final_str = "Respond with a JSON object with "
     for k, v in schema["properties"].items():
-        final_str += f"field '{k}' where it's value is {v}, "
+        final_str += f"field '{k}' where it's value is described as \"{v['description']}\", "
     final_str = final_str.strip(", ") # remove final comma cuz they are not needed
     return final_str

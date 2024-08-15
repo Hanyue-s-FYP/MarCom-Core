@@ -217,6 +217,15 @@ class Agent:
         if should_add_memory:
             self.add_to_memory(message)
         actions = actions if actions is not None else self.actions
+        def action_check(res):
+            # check if all is of str type (additional_id can be string or int)
+            for k in res:
+                if k == "additional_data_id" and not (type(res[k]) is str or type(res[k]) is int):
+                    return False
+                elif type(res[k]) is not str:
+                    return False
+            # noneed care about case (LLM output is very hard to control)
+            return res["action"].upper() in actions and res["reason"] != ""
         action = get_chain_response_json(
             self.chain,
             {
@@ -230,8 +239,9 @@ class Agent:
                 "actions": f"[{';'.join([f'{k}:{v}' for k, v in (actions.items())])}]",
             },
             expected_fields=[k for k in (AgentAction.model_json_schema()["properties"])],
+            additional_check=action_check,
             additional_check=lambda res: (
-                res["action"].upper() in actions
+                type(res["action"]) is str and res["action"].upper() in actions
             ),  # noneed care about case (LLM output is very hard to control)
         )
         return action
