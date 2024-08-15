@@ -94,19 +94,21 @@ def get_agent_desc_rewrite(
 
 
 class AgentAction(BaseModel):
-    action: str = Field(description="the action to take")
-    reason: str = Field(description="the reason for the action taken")
+    action: str = Field("", description="the action to take")
+    reason: str = Field("", description="the reason for the action taken")
     additional_data_id: int = Field(
+        "", 
         description="additional data id to complete the action, for action MESSAGE, write the agent_id (eg. 1), for action BUY, write the product_id (eg. 1), for SKIP, write 0"
     )
     additional_data_content: str = Field(
+        "",
         description="additional data content to complete the action, for action BUY, write name of the product, for action MESSAGE, write the message, for SKIP, write the reason"
     )
 
 
 # model seems very suka response with only message and not action etc, just craft one class since agent id wont be used anyways
 class MessageResponse(BaseModel):
-    message: str = Field(description="the message to send back")
+    message: str = Field("", description="the message to send back")
 
 
 class Agent:
@@ -227,7 +229,7 @@ class Agent:
                 "products": f"[{';'.join([product.to_prompt_str() for product in products])}]",
                 "actions": f"[{';'.join([f'{k}:{v}' for k, v in (actions.items())])}]",
             },
-            expected_fields=[k for k, _ in AgentAction().__dict__.items()],
+            expected_fields=[k for k in (AgentAction.model_json_schema()["properties"])],
             additional_check=lambda res: (
                 res["action"].upper() in actions
             ),  # noneed care about case (LLM output is very hard to control)
