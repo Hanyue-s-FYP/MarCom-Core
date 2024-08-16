@@ -64,6 +64,7 @@ def init_core_servicer():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     marcom_core_pb2_grpc.add_MarcomServiceServicer_to_server(MarcomCoreServicer(), server)
     server.add_insecure_port(f"[::]:{os.getenv('GRPC_CONNECTION_PORT')}")
+    print(f"Connecting to [::]:{os.getenv('GRPC_CONNECTION_PORT')}")
     server.start()
     server.wait_for_termination()
 
