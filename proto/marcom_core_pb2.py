@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x17proto/marcom_core.proto\x12\nsimulation\",\n\x0e\x41gentAttribute\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"Z\n\x05\x41gent\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x03 \x01(\t\x12)\n\x05\x61ttrs\x18\x04 \x03(\x0b\x32\x1a.simulation.AgentAttribute\"N\n\x07Product\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x03 \x01(\t\x12\r\n\x05price\x18\x04 \x01(\x02\x12\x0c\n\x04\x63ost\x18\x05 \x01(\x02\":\n\x19ProductCompetitorResponse\x12\r\n\x05query\x18\x01 \x01(\t\x12\x0e\n\x06report\x18\x02 \x01(\t\"\x91\x01\n\x11SimulationRequest\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x10\n\x08\x65nv_desc\x18\x02 \x01(\t\x12!\n\x06\x61gents\x18\x03 \x03(\x0b\x32\x11.simulation.Agent\x12%\n\x08products\x18\x04 \x03(\x0b\x32\x13.simulation.Product\x12\x14\n\x0ctotal_cycles\x18\x05 \x01(\x05\"%\n\x12SimulationResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\"%\n\x0cPauseRequest\x12\x15\n\rsimulation_id\x18\x01 \x01(\x05\" \n\rPauseResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\"&\n\rStreamRequest\x12\x15\n\rsimulation_id\x18\x01 \x01(\x05\"k\n\x10SimulationUpdate\x12\x10\n\x08\x61gent_id\x18\x01 \x01(\x05\x12\x0e\n\x06\x61\x63tion\x18\x02 \x01(\t\x12\x0f\n\x07\x63ontent\x18\x03 \x01(\t\x12\r\n\x05\x63ycle\x18\x04 \x01(\x05\x12\x15\n\rsimulation_id\x18\x05 \x01(\x05\x32\xd8\x02\n\rMarcomService\x12P\n\x0fStartSimulation\x12\x1d.simulation.SimulationRequest\x1a\x1e.simulation.SimulationResponse\x12\x46\n\x0fPauseSimulation\x12\x18.simulation.PauseRequest\x1a\x19.simulation.PauseResponse\x12T\n\x17StreamSimulationUpdates\x12\x19.simulation.StreamRequest\x1a\x1c.simulation.SimulationUpdate0\x01\x12W\n\x19ResearchProductCompetitor\x12\x13.simulation.Product\x1a%.simulation.ProductCompetitorResponseB\tZ\x07./protob\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x17proto/marcom_core.proto\x12\rMarcomService\",\n\x0e\x41gentAttribute\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"]\n\x05\x41gent\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x03 \x01(\t\x12,\n\x05\x61ttrs\x18\x04 \x03(\x0b\x32\x1d.MarcomService.AgentAttribute\"N\n\x07Product\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x03 \x01(\t\x12\r\n\x05price\x18\x04 \x01(\x02\x12\x0c\n\x04\x63ost\x18\x05 \x01(\x02\":\n\x19ProductCompetitorResponse\x12\r\n\x05query\x18\x01 \x01(\t\x12\x0e\n\x06report\x18\x02 \x01(\t\"\x97\x01\n\x11SimulationRequest\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x10\n\x08\x65nv_desc\x18\x02 \x01(\t\x12$\n\x06\x61gents\x18\x03 \x03(\x0b\x32\x14.MarcomService.Agent\x12(\n\x08products\x18\x04 \x03(\x0b\x32\x16.MarcomService.Product\x12\x14\n\x0ctotal_cycles\x18\x05 \x01(\x05\"%\n\x12SimulationResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\"%\n\x0cPauseRequest\x12\x15\n\rsimulation_id\x18\x01 \x01(\x05\" \n\rPauseResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\"&\n\rStreamRequest\x12\x15\n\rsimulation_id\x18\x01 \x01(\x05\"k\n\x10SimulationUpdate\x12\x10\n\x08\x61gent_id\x18\x01 \x01(\x05\x12\x0e\n\x06\x61\x63tion\x18\x02 \x01(\t\x12\x0f\n\x07\x63ontent\x18\x03 \x01(\t\x12\r\n\x05\x63ycle\x18\x04 \x01(\x05\x12\x15\n\rsimulation_id\x18\x05 \x01(\x05\x32\xf0\x02\n\rMarcomService\x12V\n\x0fStartSimulation\x12 .MarcomService.SimulationRequest\x1a!.MarcomService.SimulationResponse\x12L\n\x0fPauseSimulation\x12\x1b.MarcomService.PauseRequest\x1a\x1c.MarcomService.PauseResponse\x12Z\n\x17StreamSimulationUpdates\x12\x1c.MarcomService.StreamRequest\x1a\x1f.MarcomService.SimulationUpdate0\x01\x12]\n\x19ResearchProductCompetitor\x12\x16.MarcomService.Product\x1a(.MarcomService.ProductCompetitorResponseB\tZ\x07./protob\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -22,26 +22,26 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'proto.marcom_core_pb2', _gl
 if not _descriptor._USE_C_DESCRIPTORS:
   _globals['DESCRIPTOR']._loaded_options = None
   _globals['DESCRIPTOR']._serialized_options = b'Z\007./proto'
-  _globals['_AGENTATTRIBUTE']._serialized_start=39
-  _globals['_AGENTATTRIBUTE']._serialized_end=83
-  _globals['_AGENT']._serialized_start=85
-  _globals['_AGENT']._serialized_end=175
-  _globals['_PRODUCT']._serialized_start=177
-  _globals['_PRODUCT']._serialized_end=255
-  _globals['_PRODUCTCOMPETITORRESPONSE']._serialized_start=257
-  _globals['_PRODUCTCOMPETITORRESPONSE']._serialized_end=315
-  _globals['_SIMULATIONREQUEST']._serialized_start=318
-  _globals['_SIMULATIONREQUEST']._serialized_end=463
-  _globals['_SIMULATIONRESPONSE']._serialized_start=465
-  _globals['_SIMULATIONRESPONSE']._serialized_end=502
-  _globals['_PAUSEREQUEST']._serialized_start=504
-  _globals['_PAUSEREQUEST']._serialized_end=541
-  _globals['_PAUSERESPONSE']._serialized_start=543
-  _globals['_PAUSERESPONSE']._serialized_end=575
-  _globals['_STREAMREQUEST']._serialized_start=577
-  _globals['_STREAMREQUEST']._serialized_end=615
-  _globals['_SIMULATIONUPDATE']._serialized_start=617
-  _globals['_SIMULATIONUPDATE']._serialized_end=724
-  _globals['_MARCOMSERVICE']._serialized_start=727
-  _globals['_MARCOMSERVICE']._serialized_end=1071
+  _globals['_AGENTATTRIBUTE']._serialized_start=42
+  _globals['_AGENTATTRIBUTE']._serialized_end=86
+  _globals['_AGENT']._serialized_start=88
+  _globals['_AGENT']._serialized_end=181
+  _globals['_PRODUCT']._serialized_start=183
+  _globals['_PRODUCT']._serialized_end=261
+  _globals['_PRODUCTCOMPETITORRESPONSE']._serialized_start=263
+  _globals['_PRODUCTCOMPETITORRESPONSE']._serialized_end=321
+  _globals['_SIMULATIONREQUEST']._serialized_start=324
+  _globals['_SIMULATIONREQUEST']._serialized_end=475
+  _globals['_SIMULATIONRESPONSE']._serialized_start=477
+  _globals['_SIMULATIONRESPONSE']._serialized_end=514
+  _globals['_PAUSEREQUEST']._serialized_start=516
+  _globals['_PAUSEREQUEST']._serialized_end=553
+  _globals['_PAUSERESPONSE']._serialized_start=555
+  _globals['_PAUSERESPONSE']._serialized_end=587
+  _globals['_STREAMREQUEST']._serialized_start=589
+  _globals['_STREAMREQUEST']._serialized_end=627
+  _globals['_SIMULATIONUPDATE']._serialized_start=629
+  _globals['_SIMULATIONUPDATE']._serialized_end=736
+  _globals['_MARCOMSERVICE']._serialized_start=739
+  _globals['_MARCOMSERVICE']._serialized_end=1107
 # @@protoc_insertion_point(module_scope)

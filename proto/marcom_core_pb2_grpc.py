@@ -40,22 +40,22 @@ class MarcomServiceStub(object):
             channel: A grpc.Channel.
         """
         self.StartSimulation = channel.unary_unary(
-                '/simulation.MarcomService/StartSimulation',
+                '/MarcomService.MarcomService/StartSimulation',
                 request_serializer=proto_dot_marcom__core__pb2.SimulationRequest.SerializeToString,
                 response_deserializer=proto_dot_marcom__core__pb2.SimulationResponse.FromString,
                 _registered_method=True)
         self.PauseSimulation = channel.unary_unary(
-                '/simulation.MarcomService/PauseSimulation',
+                '/MarcomService.MarcomService/PauseSimulation',
                 request_serializer=proto_dot_marcom__core__pb2.PauseRequest.SerializeToString,
                 response_deserializer=proto_dot_marcom__core__pb2.PauseResponse.FromString,
                 _registered_method=True)
         self.StreamSimulationUpdates = channel.unary_stream(
-                '/simulation.MarcomService/StreamSimulationUpdates',
+                '/MarcomService.MarcomService/StreamSimulationUpdates',
                 request_serializer=proto_dot_marcom__core__pb2.StreamRequest.SerializeToString,
                 response_deserializer=proto_dot_marcom__core__pb2.SimulationUpdate.FromString,
                 _registered_method=True)
         self.ResearchProductCompetitor = channel.unary_unary(
-                '/simulation.MarcomService/ResearchProductCompetitor',
+                '/MarcomService.MarcomService/ResearchProductCompetitor',
                 request_serializer=proto_dot_marcom__core__pb2.Product.SerializeToString,
                 response_deserializer=proto_dot_marcom__core__pb2.ProductCompetitorResponse.FromString,
                 _registered_method=True)
@@ -113,9 +113,9 @@ def add_MarcomServiceServicer_to_server(servicer, server):
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'simulation.MarcomService', rpc_method_handlers)
+            'MarcomService.MarcomService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('simulation.MarcomService', rpc_method_handlers)
+    server.add_registered_method_handlers('MarcomService.MarcomService', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
@@ -136,7 +136,7 @@ class MarcomService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/simulation.MarcomService/StartSimulation',
+            '/MarcomService.MarcomService/StartSimulation',
             proto_dot_marcom__core__pb2.SimulationRequest.SerializeToString,
             proto_dot_marcom__core__pb2.SimulationResponse.FromString,
             options,
@@ -163,7 +163,7 @@ class MarcomService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/simulation.MarcomService/PauseSimulation',
+            '/MarcomService.MarcomService/PauseSimulation',
             proto_dot_marcom__core__pb2.PauseRequest.SerializeToString,
             proto_dot_marcom__core__pb2.PauseResponse.FromString,
             options,
@@ -190,7 +190,7 @@ class MarcomService(object):
         return grpc.experimental.unary_stream(
             request,
             target,
-            '/simulation.MarcomService/StreamSimulationUpdates',
+            '/MarcomService.MarcomService/StreamSimulationUpdates',
             proto_dot_marcom__core__pb2.StreamRequest.SerializeToString,
             proto_dot_marcom__core__pb2.SimulationUpdate.FromString,
             options,
@@ -217,7 +217,7 @@ class MarcomService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/simulation.MarcomService/ResearchProductCompetitor',
+            '/MarcomService.MarcomService/ResearchProductCompetitor',
             proto_dot_marcom__core__pb2.Product.SerializeToString,
             proto_dot_marcom__core__pb2.ProductCompetitorResponse.FromString,
             options,
