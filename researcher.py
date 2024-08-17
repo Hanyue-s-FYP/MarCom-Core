@@ -18,6 +18,7 @@ llm = ChatOllama(
 wrapper = DuckDuckGoSearchAPIWrapper(max_results=25)
 web_search_tool = DuckDuckGoSearchResults(api_wrapper=wrapper)
 
+
 def do_web_search(query: str) -> list[dict[str, str]]:
     return web_search_tool.invoke(query)
 
@@ -87,6 +88,7 @@ llm_text = ChatOllama(
 )  # set temp to 0 so the model dont do anything too creative :)) which is bad when doing some serious researching tasks
 report_chain = report_prompt | llm_text | StrOutputParser()
 
+
 def get_product_comp_report(p: Product, ori_query: str, web_context: Any):
     return report_chain.invoke(
         {
@@ -97,23 +99,3 @@ def get_product_comp_report(p: Product, ori_query: str, web_context: Any):
             "context": web_context,
         }
     )
-
-
-# test section
-test_prod = Product(
-    id=1,
-    name="Intensive Exam Preparation Course (PT3/SPM)",
-    desc="Exam-oriented teaching, Experienced teachers. Subjects include Chinese, Moral",
-    price=350.00,  # Assuming a price in MYR
-    cost=200.00,  # Assuming a cost for the tuition center
-    simulation_id=1,
-)
-# Test query reconstruction
-reconstructed_query = reconstruct_query_with_product(test_prod)
-print(reconstructed_query)
-# test perform web search
-search_result = web_search_tool.invoke(reconstructed_query["query"])
-print(search_result)
-# test generate report
-report = get_product_comp_report(test_prod, reconstructed_query["query"], search_result)
-print(report)
