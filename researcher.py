@@ -18,6 +18,10 @@ llm = ChatOllama(
 wrapper = DuckDuckGoSearchAPIWrapper(max_results=25)
 web_search_tool = DuckDuckGoSearchResults(api_wrapper=wrapper)
 
+def do_web_search(query: str) -> list[dict[str, str]]:
+    return web_search_tool.invoke(query)
+
+
 # transform the query given to smtg more optimised for searches first (will provide product name, description and price)
 query_prompt = PromptTemplate(
     template="""

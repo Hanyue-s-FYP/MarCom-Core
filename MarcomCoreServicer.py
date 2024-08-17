@@ -3,7 +3,13 @@ from agent import Agent, AgentAttribute
 from db import SimulationEvent
 from product import Product
 from proto import marcom_core_pb2, marcom_core_pb2_grpc
+from researcher import (
+    do_web_search,
+    get_product_comp_report,
+    reconstruct_query_with_product,
+)
 from simulation import Simulation
+
 
 class MarcomCoreServicer(marcom_core_pb2_grpc.MarcomServiceServicer):
     current_simulations: list[Simulation] = (
@@ -61,7 +67,9 @@ class MarcomCoreServicer(marcom_core_pb2_grpc.MarcomServiceServicer):
                 total_cycle=request.total_cycles,
             )
             self.current_simulations.append(sim)
-            self.simulation_generators[sim.id] = sim.run_simulation()  # create the generator
+            self.simulation_generators[sim.id] = (
+                sim.run_simulation()
+            )  # create the generator
             return marcom_core_pb2.SimulationResponse(
                 message="Simulation added, calling stream to initialise and run simulation"
             )
@@ -107,6 +115,28 @@ class MarcomCoreServicer(marcom_core_pb2_grpc.MarcomServiceServicer):
                 )
             except StopIteration:
                 # the simulation ended, remove it from the list
-                current_simulations = [sim for sim in current_simulations if int(sim.id) != int(request.simulation_id)]
+                current_simulations = [
+                    sim
+                    for sim in current_simulations
+                    if int(sim.id) != int(request.simulation_id)
+                ]
                 del self.simulation_generators[int(request.simulation_id)]
                 break
+
+    def ResearchProductCompetitor(self, request, context):
+        p = Product(
+            id=int(request.id),
+            name=request.name,
+            desc=request.desc,
+            price=float(request.price),
+            cost=float(request.cost),
+            simulation_id=0,
+        )  # not associated to a specific simulation
+        reconstructed_query = reconstruct_query_with_product(p)
+        search_results = do_web_search(reconstructed_query["query"])
+        report = get_product_comp_report(
+            p, reconstructed_query["query"], search_results
+        )
+        return marcom_core_pb2.ProductCompetitorResponse(
+            query=reconstructed_query["query"], report=report
+        )
