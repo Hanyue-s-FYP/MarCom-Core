@@ -46,7 +46,7 @@ def get_agent_desc_rewrite(
     )
 
     rewrite_desc = f"Rewrite {desc} to create an agent named {name} that is in a simulation in a second person point of view, start with 'You are in a simulation with other agents and you act as {name},'"
-    rewrite_attr_second_person = f"Given the following {{key,value}} pairs in a list {kvInStr}, write a paragraph in a second person point of view, try to fit everything in a short paragraph, do not include special characters in the description"
+    rewrite_attr_second_person = f"Given the following {{key,value}} pairs in a list {kvInStr}, write a paragraph in a second person point of view, try to fit everything in a short paragraph, do not include special characters in the description. Rewrite it such that it tells the agent about it's personality, phrase the paragraph so that they know they are consumers"
     chain = prompt | llm | parser
     invalid_characters = [
         "{",
@@ -130,7 +130,7 @@ class Agent:
             Valid agents:{agents}
             Valid products:{products}
             Valid actions:{actions}
-            Please only take actions in the valid actions list, buy only products in the valid products list, message only agents in the valid agent list.
+            Please only take actions in the valid actions list, buy only products in the valid products list, message only agents in the valid agent list. Use product names as provided, do not make up a product name
             {memory}
         """,
         input_variables=["system_prompt", "memory", "agents", "products", "actions"],
