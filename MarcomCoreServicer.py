@@ -115,9 +115,9 @@ class MarcomCoreServicer(marcom_core_pb2_grpc.MarcomServiceServicer):
                 )
             except StopIteration:
                 # the simulation ended, remove it from the list
-                current_simulations = [
+                self.current_simulations = [
                     sim
-                    for sim in current_simulations
+                    for sim in self.current_simulations
                     if int(sim.id) != int(request.simulation_id)
                 ]
                 del self.simulation_generators[int(request.simulation_id)]
