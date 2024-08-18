@@ -20,6 +20,7 @@ web_search_tool = DuckDuckGoSearchResults(api_wrapper=wrapper)
 
 
 def do_web_search(query: str) -> list[dict[str, str]]:
+    print("Searching on DuckDuckGo")
     return web_search_tool.invoke(query)
 
 
@@ -48,6 +49,7 @@ query_chain = (
 
 
 def reconstruct_query_with_product(p: Product):
+    print("Reconstructing query from product")
     # but still, check if it follows the format
     return get_chain_response_json(
         query_chain,
@@ -90,6 +92,7 @@ report_chain = report_prompt | llm_text | StrOutputParser()
 
 
 def get_product_comp_report(p: Product, ori_query: str, web_context: Any):
+    print("Obtaining competitor report")
     return report_chain.invoke(
         {
             "name": p.name,

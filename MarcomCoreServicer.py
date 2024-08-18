@@ -132,6 +132,7 @@ class MarcomCoreServicer(marcom_core_pb2_grpc.MarcomServiceServicer):
                 break
 
     def ResearchProductCompetitor(self, request, context):
+        print(request)
         p = Product(
             id=int(request.id),
             name=request.name,
