@@ -24,7 +24,7 @@ class Simulation:
         self.agents = agents
         self.products = products
         self.total_cycle = total_cycle
-        self.cycle = 1
+        self.cycle = 0 # for init
         self.inited = False
         self.paused = False
 
@@ -312,9 +312,11 @@ class Simulation:
         if not self.inited:
             for simulation_init_event in self.init_simulation():
                 yield simulation_init_event
+            self.cycle = 1 # init is 0, init finish become 1
         while self.cycle <= self.total_cycle:
             for event in self.proceed_cycle():
                 yield event
+        print("Simulation completed")
 
 
 # helper object to get structured response

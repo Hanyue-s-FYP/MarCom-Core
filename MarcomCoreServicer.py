@@ -121,6 +121,14 @@ class MarcomCoreServicer(marcom_core_pb2_grpc.MarcomServiceServicer):
                     if int(sim.id) != int(request.simulation_id)
                 ]
                 del self.simulation_generators[int(request.simulation_id)]
+                # tell backend it ended
+                yield marcom_core_pb2.SimulationUpdate(
+                    agent_id=0,
+                    action="COMPLETE",
+                    content="",
+                    cycle=sim_event.cycle,
+                    simulation_id=sim_event.sim_id,
+                )
                 break
 
     def ResearchProductCompetitor(self, request, context):
