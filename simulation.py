@@ -179,7 +179,7 @@ class Simulation:
                             # generate feedback
                             feedback = self.simulation_response_helper(
                                 action="BUY",
-                                reason=action["additional_data_content"],
+                                reason=action["reason"],
                                 env_desc=self.env_desc,
                                 product=product_to_buy[0],
                                 agent=agent,
@@ -202,7 +202,7 @@ class Simulation:
                             agent=agent_model,
                             sim_id=self.id,
                             type="SKIP",
-                            content="",
+                            content=action['reason'],
                             cycle=self.cycle,
                         )
                         yield event
