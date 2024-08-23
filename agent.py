@@ -226,8 +226,8 @@ class Agent:
                     return False
                 elif k != "additional_data_id" and type(res[k]) is not str:
                     return False
-            # noneed care about case (LLM output is very hard to control)
-            return res["action"].upper() in actions and res["reason"] != ""
+            # noneed care about case (LLM output is very hard to control), for MESSAGE, there is no need for a reason
+            return res["action"].upper() in actions and (res["action"] == "MESSAGE" or res["reason"] != "")
         action = get_chain_response_json(
             self.chain,
             {
